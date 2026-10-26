@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="tl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#241044">
+<title>Calisthenics Workout Timer</title>
+<style>
+:root{--bg:#f0e5ff;--card:#fffaff;--ink:#201039;--purple:#4c267b;--accent:#b99aff;--muted:#6d607c}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#d5baff,#f6efff 55%,#cbb0f5);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:680px;margin:auto;padding:18px 14px 32px}
+header{background:#1e1037;color:white;padding:20px;border-radius:18px;margin-bottom:14px}
+h1{font-size:clamp(1.35rem,5vw,2rem);margin:0 0 6px;line-height:1.1}header p{margin:0;color:#e6d8ff}
+.card{background:var(--card);border:1px solid #d6c2f4;border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 5px 18px #43266b12}
+.kicker{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}
+.exercise{font-size:1.45rem;font-weight:900;margin:5px 0}.details{color:var(--muted);font-size:.95rem}
+.timer{font-size:3.4rem;font-weight:900;font-variant-numeric:tabular-nums;text-align:center;margin:12px 0 4px}
+.progress{height:8px;background:#e7dcf5;border-radius:99px;overflow:hidden;margin:12px 0}.bar{height:100%;width:0;background:var(--purple);transition:width .2s}
+.buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+button{border:0;border-radius:12px;padding:12px 14px;font-weight:800;font-size:.95rem;cursor:pointer;background:#e9dcff;color:var(--ink);flex:1;min-width:110px}
+button.primary{background:var(--purple);color:white}button:disabled{opacity:.45}
+.small{font-size:.84rem;color:var(--muted);line-height:1.45}
+.list{display:grid;gap:8px}.item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:#f3ebff}.num{background:#2a1746;color:white;border-radius:50%;width:32px;height:32px;display:grid;place-items:center;font-weight:900;flex-shrink:0}.item strong{display:block}.item span{font-size:.82rem;color:var(--muted)}
+.status{font-weight:800;color:var(--purple);text-align:center;min-height:1.4em}
+label{display:flex;align-items:center;gap:8px;font-size:.9rem;margin-top:10px}
+footer{text-align:center;color:#594a6d;font-size:.8rem;margin-top:18px}
+</style>
+</head>
+<body>
+<main>
+<header><h1>FULL CALISTHENICS</h1><p>Workout timer • Rest alarm • 7 exercises</p></header>
+
+<section class="card">
+  <div class="kicker" id="stepLabel">Handa ka na?</div>
+  <div class="exercise" id="exerciseName">Pull-ups</div>
+  <div class="details" id="exerciseDetails">12 reps • Set 1 of 3</div>
+  <div class="timer" id="clock">00:00</div>
+  <div class="status" id="status">Pindutin ang Start para magsimula.</div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+  <div class="buttons">
+    <button class="primary" id="startBtn">▶ Start</button>
+    <button id="doneBtn">✓ Tapos ang set</button>
+    <button id="pauseBtn">Ⅱ Pause</button>
+    <button id="skipBtn">⏭ Skip</button>
+  </div>
+  <label><input type="checkbox" id="soundToggle" checked> May tunog kapag tapos ang timer</label>
+  <label><input type="checkbox" id="vibrateToggle" checked> Mag-vibrate kung supported</label>
+  <p class="small">Paano gamitin: Gawin ang reps, tapos pindutin ang “Tapos ang set.” Awtomatikong magsisimula ang pahinga. Sa plank, pindutin ang Start para sa 60-second timer.</p>
+</section>
+
+<section class="card">
+  <div class="kicker">Workout sequence</div>
+  <div class="list" id="workoutList"></div>
+</section>
+
+<section class="card">
+  <strong>Suggested guide</strong>
+  <p class="small">Warm-up 5–10 minuto. Beginner: magsimula sa 1–2 rounds at bawasan ang reps kung kailangan. Ang isang round ay lahat ng 7 exercises. Magpahinga ng 2–3 minuto sa pagitan ng rounds. Itigil kung may matalim na sakit, pagkahilo, o hindi na maayos ang form.</p>
+  <p class="small"><b>Note:</b> Dapat bukas ang page para siguradong tumunog ang timer. Sa single-file version na ito, hindi garantisado ang alarm kapag naka-lock ang phone o isinara ang browser.</p>
+</section>
+<footer>Gumalaw nang maayos. Unti-unti lang ang dagdag sa hirap.</footer>
+</main>
+<script>
+const exercises = [
+ {name:"Pull-ups",reps:"12 reps",rest:150,restText:"2–3 min"},
+ {name:"Pike push-ups",reps:"12 reps",rest:120,restText:"2 min"},
+ {name:"Decline push-ups",reps:"15 reps",rest:105,restText:"90–120 sec"},
+ {name:"Standard push-ups",reps:"20 reps",rest:90,restText:"90 sec"},
+ {name:"Bench dips",reps:"15 reps",rest:90,restText:"90 sec"},
+ {name:"Squat jumps",reps:"20 reps",rest:120,restText:"2 min"},
+ {name:"Forearm plank",reps:"60 seconds",rest:75,restText:"60–90 sec",timed:true}
+];
+let exIndex=0,setNum=1,remaining=0,total=0,mode="idle",interval=null,round=1;
+const $=id=>document.getElementById(id);
+function fmt(s){s=Math.max(0,Math.ceil(s));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function renderList(){
+ $("workoutList").innerHTML=exercises.map((e,i)=>`<div class="item"><div class="num">${i+1}</div><div><strong>${e.name}</strong><span>${e.reps} × 3 sets • Pahinga ${e.restText}</span></div></div>`).join("");
+}
+function update(){
+ const e=exercises[exIndex];
+ $("stepLabel").textContent=`ROUND ${round} • EXERCISE ${exIndex+1} OF ${exercises.length}`;
+ $("exerciseName").textContent=mode==="rest"?"Pahinga muna":e.name;
+ $("exerciseDetails").textContent=mode==="rest"?`Bago ang ${e.name} • Set ${setNum} of 3`:`${e.reps} • Set ${setNum} of 3`;
+ $("clock").textContent=fmt(remaining);
+ $("bar").style.width=total?`${Math.min(100,100*(total-remaining)/total)}%`:"0%";
+ $("startBtn").textContent=mode==="paused"?"▶ Resume":(mode==="idle"?"▶ Start":mode==="finished"?"↻ Restart":"▶ Start timer");
+ $("doneBtn").disabled=mode==="rest"||mode==="finished";
+ $("pauseBtn").disabled=mode==="idle"||mode==="finished";
+ $("status").textContent=mode==="rest"?"Pahinga. Hintaying matapos ang countdown.":mode==="timed"?"Hawakan ang plank hanggang matapos ang timer.":mode==="paused"?"Naka-pause.":mode==="finished"?"Workout complete! Mag-cool down.":mode==="active"?"Gawin ang reps, saka pindutin ang Tapos ang set.":"Pindutin ang Start para magsimula.";
+}
+function beep(){
+ if($("soundToggle").checked){
+  try{const C=window.AudioContext||window.webkitAudioContext;if(C){const c=new C();[0,0.22,0.44].forEach((t,i)=>{const o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.value=i===1?880:660;g.gain.value=.12;o.connect(g);g.connect(c.destination);o.start(c.currentTime+t);o.stop(c.currentTime+t+.14)});}}
+  catch(e){}
+ }
+ if($("vibrateToggle").checked&&navigator.vibrate)navigator.vibrate([180,100,180]);
+}
+function stop(){if(interval){clearInterval(interval);interval=null}}
+function tick(){remaining--;if(remaining<=0){remaining=0;stop();if(mode==="rest"){mode=exercises[exIndex].timed?"timed":"active";if(exercises[exIndex].timed){remaining=60;total=60;mode="timed";interval=setInterval(tick,1000);}beep();}else if(mode==="timed"){beep();finishSet(true);}update();return}update()}
+function begin(){
+ if(mode==="finished"){exIndex=0;setNum=1;round=1;mode="idle";}
+ if(mode==="paused"){mode=window.previousMode||"active";interval=setInterval(tick,1000);update();return;}
+ const e=exercises[exIndex];
+ if(mode==="idle"){mode=e.timed?"timed":"active";if(e.timed){remaining=60;total=60;interval=setInterval(tick,1000)}}
+ else if(mode==="active"&&e.timed){mode="timed";remaining=60;total=60;interval=setInterval(tick,1000)}
+ else if(mode==="rest"){stop();mode=e.timed?"timed":"active";if(e.timed){remaining=60;total=60;interval=setInterval(tick,1000)}}
+ update();
+}
+function finishSet(fromTimer=false){
+ stop();
+ if(setNum<3){
+  const e=exercises[exIndex];setNum++;mode="rest";remaining=e.rest;total=e.rest;interval=setInterval(tick,1000);
+ }else{
+  setNum=1;exIndex++;
+  if(exIndex>=exercises.length){exIndex=0;round++;if(round>1){mode="finished";remaining=0;total=0;beep();update();return}}
+  mode="active";remaining=0;total=0;
+  if(exercises[exIndex].timed){$("status").textContent="Plank: pindutin ang Start timer kapag handa ka."}
+ }
+ update();
+}
+$("startBtn").addEventListener("click",begin);
+$("doneBtn").addEventListener("click",()=>{if(mode==="idle")mode="active";if(mode==="active"||mode==="timed")finishSet();});
+$("pauseBtn").addEventListener("click",()=>{if(mode==="paused"){begin();return}if(mode!=="idle"&&mode!=="finished"){window.previousMode=mode;stop();mode="paused";update()}});
+$("skipBtn").addEventListener("click",()=>{stop();exIndex++;setNum=1;if(exIndex>=exercises.length){exIndex=0;round++;}if(round>1){mode="finished";remaining=0;total=0}else{mode="active";remaining=0;total=0}update()});
+renderList();update();
+</script>
+</body></html>
