@@ -1,234 +1,146 @@
 
-<!DOCTYPE html>
-<html lang="tl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#05050d">
-<title>Samson Calisthenics</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#05050d;color:#f8f7ff;font-family:Arial,sans-serif}
-.app{max-width:480px;margin:auto;padding:16px 16px 90px}
-header{text-align:center;padding:25px 0}
-.logo{font-size:45px;color:#9b4dff}
-h1{font-size:30px;font-style:italic;margin:4px}
-h1 span{display:block;color:#973cff}
-.tag{font-size:10px;letter-spacing:3px}
-button{cursor:pointer;color:white;font-size:15px;font-weight:bold}
-.primary{width:100%;padding:17px;background:linear-gradient(100deg,#6323f5,#a02bff);border:0;border-radius:14px}
-.secondary{padding:12px;background:#19172c;border:1px solid #48366f;border-radius:12px}
-.screen{display:none}
-.screen.active{display:block}
-.hero{height:180px;border-radius:15px;border:1px solid #6034a3;background:linear-gradient(135deg,#171027,#090911);display:flex;flex-direction:column;justify-content:center;align-items:center;margin-bottom:16px}
-.difficulty{display:flex;gap:8px;margin:15px 0}
-.difficulty button{flex:1;padding:10px 3px;background:#10101c;border:1px solid #8d37ff;border-radius:9px}
-h2{text-align:center;text-transform:uppercase;font-size:19px}
-.exercise{display:flex;align-items:center;text-align:left;gap:12px;width:100%;padding:10px;margin:9px 0;background:#0c0d19;border:1px solid #403064;border-radius:13px}
-.exercise .pic{width:86px;height:67px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#211337;border-radius:9px;font-size:35px}
-.info{flex:1}
-.info strong{display:block;font-size:13px}
-.info small{display:block;color:#c5bedc;margin-top:6px}
-.pill{display:inline-block;background:#7029ee;border-radius:5px;padding:4px 8px;margin-top:5px;font-size:10px}
-.photo{height:180px;display:flex;align-items:center;justify-content:center;background:#151022;border:1px solid #55318c;border-radius:14px;font-size:90px}
-.description{color:#c6c0df;line-height:1.5}
-.stats{display:flex;justify-content:space-around;color:#d6b8ff;padding:12px 0;border-bottom:1px solid #34264e}
-.counter{display:flex;align-items:center;justify-content:space-between;border:1px solid #49346d;border-radius:12px;padding:12px;margin:18px 0}
-.round{width:45px;height:45px;border-radius:50%;background:#100d20;border:1px solid #9a4bff;font-size:25px}
-.number{font-size:34px;font-weight:bold}
-.timer-ring{width:220px;height:220px;border:8px solid #812dff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:30px auto;box-shadow:0 0 22px #7124cc55}
-.timer{font-size:43px;font-weight:bold}
-.center{text-align:center;color:#c5bedf}
-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,480px);display:flex;justify-content:space-around;background:#090912;border-top:1px solid #39245c;padding:12px 4px}
-nav button{background:none;border:0;color:#b8a8d9;font-size:12px}
-nav span{display:block;font-size:22px;margin-bottom:4px}
-.check{padding:12px;border-bottom:1px solid #302344}
-</style>
-</head>
-<body>
-<div class="app">
+name: Build Samson Calisthenics APK
 
-<section id="home" class="screen active">
-<header>
-<div class="logo">♜</div>
-<h1>SAMSON <span>CALISTHENICS</span></h1>
-<p class="tag">DISCIPLINE BUILDS FREEDOM</p>
-</header>
-<div class="hero">
-<div style="font-size:65px">💪</div>
-<strong>BUILD STRENGTH</strong>
-<p class="tag">ONE REP AT A TIME</p>
-</div>
-<div class="difficulty">
-<button onclick="setLevel('EASY',this)">EASY</button>
-<button onclick="setLevel('MEDIUM',this)">MEDIUM</button>
-<button onclick="setLevel('HARD',this)">HARD</button>
-</div>
-<button class="primary" onclick="start()">▶ START WORKOUT</button>
-<h2>Your Training Plan</h2>
-<div id="homeList"></div>
-</section>
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '*.html'
+      - 'logo.png'
+      - '.github/workflows/build.yml'
 
-<section id="workout" class="screen">
-<h2>Workout</h2>
-<p class="center">Piliin ang exercise mo</p>
-<div id="workoutList"></div>
-<button class="secondary" onclick="show('home')">← BACK HOME</button>
-</section>
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-<section id="detail" class="screen">
-<button class="secondary" onclick="show('workout')">← BACK</button>
-<h2 id="exerciseTitle">PULL-UPS</h2>
-<div class="photo" id="exercisePhoto">🏋️</div>
-<div class="stats"><span id="repsText">12 reps</span><span>3 sets</span><span id="restText">Rest 2:30</span></div>
-<p class="description" id="instructions"></p>
-<div class="counter">
-<button class="round" onclick="adjust(-1)">−</button>
-<div class="number"><span id="count">12</span><small style="font-size:13px"> reps</small></div>
-<button class="round" onclick="adjust(1)">+</button>
-</div>
-<button class="primary" id="done" onclick="finishSet()">DONE — SET 1/3</button>
-</section>
+    steps:
+      - uses: actions/checkout@v4
 
-<section id="rest" class="screen">
-<h2>REST</h2>
-<div class="timer-ring">
-<div class="timer" id="timer">02:30</div>
-<div class="center">REST TIME</div>
-</div>
-<p class="center">Magpahinga muna. Huminga nang malalim.</p>
-<button class="primary" id="pause" onclick="togglePause()">Ⅱ PAUSE</button>
-<br><br>
-<button class="secondary" style="width:100%" onclick="resetTimer()">↻ RESET TIMER</button>
-<p class="center" id="next">Next set</p>
-</section>
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
 
-<section id="complete" class="screen">
-<header>
-<div class="logo">♜</div>
-<h1>WORKOUT <span>COMPLETE!</span></h1>
-<p>Magaling! Natapos mo ang workout.</p>
-</header>
-<div id="summary"></div>
-<button class="primary" onclick="resetWorkout()">↻ WORKOUT AGAIN</button>
-</section>
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
 
-<section id="history" class="screen">
-<h2>History</h2>
-<p class="center">Patuloy lang sa training!</p>
-</section>
+      - name: Install Android SDK
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-<section id="settings" class="screen">
-<h2>Settings</h2>
-<p class="center">Samson Calisthenics</p>
-<p class="center">Dark theme · Purple style</p>
-<button class="secondary" style="width:100%" onclick="resetWorkout()">RESET WORKOUT</button>
-</section>
-</div>
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
 
-<nav>
-<button onclick="show('home')"><span>⌂</span>Home</button>
-<button onclick="show('workout')"><span>▤</span>Workout</button>
-<button onclick="show('history')"><span>◷</span>History</button>
-<button onclick="show('settings')"><span>⚙</span>Settings</button>
-</nav>
+      - name: Create Android project
+        run: |
+          mkdir -p app/src/main/assets
+          mkdir -p app/src/main/java/com/samson/calisthenics
+          mkdir -p app/src/main/res/mipmap-mdpi
+          mkdir -p app/src/main/res/mipmap-hdpi
+          mkdir -p app/src/main/res/mipmap-xhdpi
+          mkdir -p app/src/main/res/mipmap-xxhdpi
+          mkdir -p app/src/main/res/mipmap-xxxhdpi
 
-<script>
-const exercises=[
-{name:"Pull-ups",reps:12,rest:150,icon:"🏋️",desc:"Hilahin ang sarili pataas hanggang lumampas ang baba sa bar."},
-{name:"Pike Push-ups",reps:12,rest:120,icon:"🤸",desc:"Iangat ang balakang at ibaba ang ulo nang kontrolado."},
-{name:"Decline Push-ups",reps:15,rest:105,icon:"💪",desc:"Ipatong ang mga paa sa bangko at panatilihing tuwid ang katawan."},
-{name:"Standard Push-ups",reps:20,rest:90,icon:"🏋️",desc:"Ibaba ang dibdib nang kontrolado at itulak pabalik pataas."},
-{name:"Bench Dips",reps:15,rest:90,icon:"🪑",desc:"Gamitin ang matibay na bangko para ibaba at iangat ang katawan."},
-{name:"Squat Jumps",reps:20,rest:120,icon:"🦵",desc:"Magsquat, tumalon, at lumapag nang marahan."},
-{name:"Forearm Plank",reps:60,rest:75,icon:"⏱️",desc:"Panatilihing tuwid ang katawan sa loob ng 60 segundo."}
-];
-let current=0,setNo=1,count=12,remaining=0,tick=null,paused=false,done=Array(7).fill(0);
+          cp calisthenics_workout_timer.html app/src/main/assets/index.html
 
-function show(id){
-document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-document.getElementById(id).classList.add('active');
-if(id==='workout')renderWorkout();
-}
-function setLevel(level,button){
-document.querySelectorAll('.difficulty button').forEach(b=>b.style.boxShadow='none');
-button.style.boxShadow='0 0 15px #a02bff';
-}
-function card(e,i){
-return `<button class="exercise" onclick="openExercise(${i})">
-<span class="pic">${e.icon}</span>
-<span class="info"><strong>${e.name.toUpperCase()}</strong>
-<small>${e.reps} ${e.reps===60?'seconds':'reps'}</small>
-<span class="pill">♧ 3 SETS</span></span><span>›</span></button>`;
-}
-function renderHome(){
-document.getElementById('homeList').innerHTML=exercises.slice(0,3).map(card).join('');
-}
-function renderWorkout(){
-document.getElementById('workoutList').innerHTML=exercises.map(card).join('');
-}
-function openExercise(i){
-current=i;setNo=done[i]+1;count=exercises[i].reps;
-updateDetail();show('detail');
-}
-function updateDetail(){
-let e=exercises[current];
-document.getElementById('exerciseTitle').textContent=e.name.toUpperCase();
-document.getElementById('exercisePhoto').textContent=e.icon;
-document.getElementById('repsText').textContent=e.reps===60?'60 seconds':e.reps+' reps';
-document.getElementById('restText').textContent='Rest '+Math.floor(e.rest/60)+':'+String(e.rest%60).padStart(2,'0');
-document.getElementById('instructions').textContent=e.desc;
-document.getElementById('count').textContent=count;
-document.getElementById('done').textContent='DONE — SET '+setNo+'/3';
-}
-function adjust(n){
-count=Math.max(0,Math.min(exercises[current].reps,count+n));
-document.getElementById('count').textContent=count;
-}
-function start(){current=0;setNo=1;count=exercises[0].reps;updateDetail();show('detail')}
-function finishSet(){
-done[current]=Math.max(done[current],setNo);
-if(done.every(n=>n>=3)){renderSummary();show('complete');return}
-remaining=exercises[current].rest;
-document.getElementById('next').textContent=exercises[current].name+' — next set / exercise';
-show('rest');runTimer();
-}
-function formatTime(n){return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
-function runTimer(){
-clearInterval(tick);paused=false;
-document.getElementById('pause').textContent='Ⅱ PAUSE';
-document.getElementById('timer').textContent=formatTime(remaining);
-tick=setInterval(()=>{
-if(paused)return;
-remaining--;
-document.getElementById('timer').textContent=formatTime(Math.max(0,remaining));
-if(remaining<=0){
-clearInterval(tick);
-if(navigator.vibrate)navigator.vibrate([250,100,250]);
-if(done[current]<3){setNo=done[current]+1}
-else{
-let next=done.findIndex(n=>n<3);
-if(next>=0){current=next;setNo=done[next]+1}
-}
-count=exercises[current].reps;updateDetail();show('detail');
-}
-},1000);
-}
-function togglePause(){
-paused=!paused;
-document.getElementById('pause').textContent=paused?'▶ RESUME':'Ⅱ PAUSE';
-}
-function resetTimer(){
-remaining=exercises[current].rest;
-document.getElementById('timer').textContent=formatTime(remaining);
-}
-function renderSummary(){
-document.getElementById('summary').innerHTML=exercises.map((e,i)=>`<div class="check">✅ ${e.name} — ${done[i]}/3 sets</div>`).join('');
-}
-function resetWorkout(){
-clearInterval(tick);done=Array(7).fill(0);current=0;setNo=1;count=12;renderHome();show('home');
-}
-renderHome();renderWorkout();
-</script>
-</body>
-</html>
+          cat > settings.gradle <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "SamsonCalisthenics"
+          include(":app")
+          EOF
+
+          echo "plugins { id 'com.android.application' version '8.5.2' apply false }" > build.gradle
+
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+          android {
+              namespace 'com.samson.calisthenics'
+              compileSdk 35
+              defaultConfig {
+                  applicationId 'com.samson.calisthenics'
+                  minSdk 23
+                  targetSdk 35
+                  versionCode 1
+                  versionName '1.0'
+              }
+          }
+          EOF
+
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <application
+                  android:theme="@android:style/Theme.Material.NoActionBar"
+                  android:label="Samson Calisthenics"
+                  android:icon="@mipmap/ic_launcher">
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN"/>
+                          <category android:name="android.intent.category.LAUNCHER"/>
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          cat > app/src/main/java/com/samson/calisthenics/MainActivity.java <<'EOF'
+          package com.samson.calisthenics;
+
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.webkit.WebView;
+          import android.webkit.WebSettings;
+
+          public class MainActivity extends Activity {
+              @Override
+              protected void onCreate(Bundle state) {
+                  super.onCreate(state);
+                  WebView web = new WebView(this);
+                  WebSettings settings = web.getSettings();
+                  settings.setJavaScriptEnabled(true);
+                  settings.setDomStorageEnabled(true);
+                  setContentView(web);
+                  web.loadUrl("file:///android_asset/index.html");
+              }
+          }
+          EOF
+
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
+
+          for size in 48 72 96 144 192; do
+            case "$size" in
+              48) folder=mipmap-mdpi ;;
+              72) folder=mipmap-hdpi ;;
+              96) folder=mipmap-xhdpi ;;
+              144) folder=mipmap-xxhdpi ;;
+              192) folder=mipmap-xxxhdpi ;;
+            esac
+            convert logo.png -resize "${size}x${size}" -background black -gravity center -extent "${size}x${size}" "app/src/main/res/${folder}/ic_launcher.png"
+          done
+
+      - name: Build APK
+        run: gradle assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Samson-Calisthenics-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
