@@ -22,11 +22,11 @@ jobs:
 
       - uses: android-actions/setup-android@v3
 
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses
+
       - name: Install Android SDK
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
-
-      - name: Create Android project
-        run: |
           mkdir -p app/src/main/assets
           mkdir -p app/src/main/java/com/samson/calisthenics
           mkdir -p app/src/main/res/mipmap-mdpi
