@@ -12,6 +12,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -20,16 +21,20 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - uses: android-actions/setup-android@v3
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
         with:
-          accept-android-sdk-licenses: false
-          log-accepted-android-sdk-licenses: false
-      - name: Accept Android SDK licenses
-        run: mkdir -p "$ANDROID_HOME/licenses"
-          yes | sdkmanager --licenses || true
+          packages: 'platform-tools'
 
       - name: Install Android SDK
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Create Android project
+        run: |
           mkdir -p app/src/main/assets
           mkdir -p app/src/main/java/com/samson/calisthenics
           mkdir -p app/src/main/res/mipmap-mdpi
@@ -37,6 +42,7 @@ jobs:
           mkdir -p app/src/main/res/mipmap-xhdpi
           mkdir -p app/src/main/res/mipmap-xxhdpi
           mkdir -p app/src/main/res/mipmap-xxxhdpi
+
           cp calisthenics_workout_timer.html app/src/main/assets/index.html
 
           cat > settings.gradle <<'EOF'
@@ -97,10 +103,12 @@ jobs:
 
           cat > app/src/main/java/com/samson/calisthenics/MainActivity.java <<'EOF'
           package com.samson.calisthenics;
+
           import android.app.Activity;
           import android.os.Bundle;
           import android.webkit.WebView;
           import android.webkit.WebSettings;
+
           public class MainActivity extends Activity {
               @Override
               protected void onCreate(Bundle state) {
@@ -117,6 +125,7 @@ jobs:
 
           sudo apt-get update
           sudo apt-get install -y imagemagick
+
           for size in 48 72 96 144 192; do
             case "$size" in
               48) folder=mipmap-mdpi ;;
@@ -127,10 +136,6 @@ jobs:
             esac
             convert logo.png -resize "${size}x${size}" -background black -gravity center -extent "${size}x${size}" "app/src/main/res/${folder}/ic_launcher.png"
           done
-
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.7'
 
       - name: Build APK
         run: gradle assembleDebug
