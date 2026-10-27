@@ -35,7 +35,7 @@ button{font:inherit;cursor:pointer;color:inherit;border:0}button:focus-visible{o
  <div class="status"><span>9:41</span><span>▮▮▮  ◉  ▰</span></div>
  <section id="home" class="screen active">
   <div class="hero">
-   <img alt="Athlete training in a dark gym" src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=900&q=85">
+   <img alt="Athlete training in a dark gym" src="images/hero.png" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=900&q=85'">
    <div class="brand"><div class="helmet">♜</div><h1>SAMSON <span>CALISTHENICS</span></h1><div class="tagline">DISCIPLINE BUILDS FREEDOM</div></div>
    <div class="hero-caption">BUILD STRENGTH · ONE REP AT A TIME</div>
   </div>
@@ -84,6 +84,7 @@ button{font:inherit;cursor:pointer;color:inherit;border:0}button:focus-visible{o
  <button data-screen="settings" onclick="go('settings')"><span>⚙</span>Settings</button>
 </nav>
 <script>
+
 const exercises=[
  {name:'Pull-ups',reps:12,seconds:0,rest:150,restText:'2–3 min',photo:'pullup',instruction:'Hilahin ang sarili pataas hanggang ang baba ay lumampas sa bar. Ibaba nang kontrolado.',sets:3},
  {name:'Pike Push-ups',reps:12,seconds:0,rest:120,restText:'2 min',photo:'pike',instruction:'Iangat ang balakang at ibaba ang ulo papunta sa sahig habang kontrolado ang galaw.',sets:3},
@@ -91,29 +92,141 @@ const exercises=[
  {name:'Standard Push-ups',reps:20,seconds:0,rest:90,restText:'1 min 30 sec',photo:'pushup',instruction:'Panatilihing tuwid ang katawan. Ibaba ang dibdib nang kontrolado at itulak pabalik pataas.',sets:3},
  {name:'Bench Dips',reps:15,seconds:0,rest:90,restText:'1 min 30 sec',photo:'dips',instruction:'Ilagay ang mga kamay sa matibay na bangko, ibaba ang katawan at itulak pabalik pataas.',sets:3},
  {name:'Squat Jumps',reps:20,seconds:0,rest:120,restText:'2 min',photo:'jump',instruction:'Magsquat, tumalon pataas, at lumapag nang marahan bago bumalik sa squat position.',sets:3},
- {name:'Forearm Plank',reps:60,seconds:1,rest:75,restText:'1 min 15 sec',photo:'plank',instruction:'Ipatong ang mga siko sa sahig at panatilihing tuwid ang katawan. Hawakan ang posisyon nang 60 segundo.',sets:3}
+ {name:'Forearm Plank',reps:60,seconds:1,rest:75,restText:'1 min 15 sec',photo:'plank',instruction:'Ipatong ang mga siko sa sahig at panatilihing tuwid ang katawan. Hawakan ang posisyon sa itinakdang oras.',sets:3}
 ];
 const photoUrl=(id)=>`images/${id}.png`;
-let current=0,setNo=1,count=12,level='EASY',remaining=120,timerId=null,running=false,done=Array(7).fill(0);
-function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));if(id==='workout')renderLists();if(id==='home')renderHome()}
-function setDifficulty(l,btn){level=l;document.querySelectorAll('.difficulty button').forEach(b=>b.classList.toggle('selected',b===btn))}
-function cardHTML(e,i){return `<button class="exercise-card" onclick="openExercise(${i})"><img class="thumb" src="${photoUrl(e.photo)}" alt="${e.name}" onerror="this.style.opacity='.2'"><span class="ex-info"><strong>${e.name.toUpperCase()}</strong><small>${e.seconds?'60 seconds':e.reps+' reps'}</small><span class="pill">♧ 3 SETS</span></span><span class="chevron">›</span></button>`}
+const fallbackPhotos={
+ pullup:'https://images.unsplash.com/photo-1598971639058-fab3c3109a00?auto=format&fit=crop&w=900&q=82',
+ pike:'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?auto=format&fit=crop&w=900&q=82',
+ decline:'https://images.unsplash.com/photo-1598971639058-fab3c3109a00?auto=format&fit=crop&w=900&q=82',
+ pushup:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=900&q=82',
+ dips:'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=900&q=82',
+ jump:'https://images.unsplash.com/photo-1566241142559-40e1tab8c9d?auto=format&fit=crop&w=900&q=82',
+ plank:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=82'
+};
+let current=0,setNo=1,count=12,level='EASY',remaining=120,timerId=null,running=false;
+let done=Array(7).fill(0);
+let history=loadHistory();
+
+function loadHistory(){try{return JSON.parse(localStorage.getItem('samsonWorkoutHistory')||'[]')}catch(e){return []}}
+function saveHistory(){try{localStorage.setItem('samsonWorkoutHistory',JSON.stringify(history))}catch(e){}}
+function targetFor(e){
+ if(e.seconds){return level==='EASY'?30:(level==='HARD'?75:60)}
+ const factor=level==='EASY'?0.75:(level==='HARD'?1.25:1);
+ return Math.max(1,Math.round(e.reps*factor));
+}
+function go(id){
+ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));
+ if(id==='workout')renderLists();
+ if(id==='home')renderHome();
+ if(id==='history')renderHistory();
+}
+function setDifficulty(l,btn){
+ level=l;
+ document.querySelectorAll('.difficulty button').forEach(b=>b.classList.toggle('selected',b===btn));
+ renderHome();
+}
+function cardHTML(e,i){
+ const target=targetFor(e);
+ return `<button class="exercise-card" onclick="openExercise(${i})"><img class="thumb" src="${photoUrl(e.photo)}" alt="${e.name}" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src=fallbackPhotos['${e.photo}']}else{this.style.opacity='.2'}"><span class="ex-info"><strong>${e.name.toUpperCase()}</strong><small>${e.seconds?target+' seconds':target+' reps'}</small><span class="pill">♧ 3 SETS · ${done[i]}/3</span></span><span class="chevron">›</span></button>`;
+}
 function renderHome(){document.getElementById('homeList').innerHTML=exercises.slice(0,3).map(cardHTML).join('')}
-function renderLists(){document.getElementById('workoutList').innerHTML=exercises.map(cardHTML).join('');document.getElementById('listProgress').style.width=(done.reduce((a,b)=>a+b,0)/21*100)+'%'}
-function openExercise(i){current=i;setNo=Math.min(done[i]+1,3);count=exercises[i].reps;showDetail();go('detail')}
-function showDetail(){let e=exercises[current];document.getElementById('detailHeader').textContent=e.name.toUpperCase();document.getElementById('detailPhoto').src=photoUrl(e.photo);document.getElementById('detailPhoto').alt=e.name;document.getElementById('detailTitle').textContent=e.name;document.getElementById('detailReps').textContent=e.seconds?'60 sec':' '+e.reps+' reps';document.getElementById('detailRest').textContent=e.restText;document.getElementById('detailInstruction').textContent=e.instruction;document.getElementById('count').textContent=count;document.getElementById('countUnit').textContent=e.seconds?' / 60 sec':' / '+e.reps+' reps';document.getElementById('doneButton').textContent=`DONE — SET ${setNo}/3`}
-function changeCount(n){let e=exercises[current];count=Math.max(0,Math.min(e.reps,count+n));document.getElementById('count').textContent=count}
-function startWorkout(){current=0;setNo=1;count=exercises[0].reps;showDetail();go('detail')}
-function finishSet(){let e=exercises[current];if(count<e.reps){if(!confirm('Hindi pa kumpleto ang target reps. Markahan pa rin ang set bilang tapos?'))return}done[current]=Math.max(done[current],setNo);if(done.every(x=>x>=3)){showComplete();go('complete');return}remaining=e.rest;document.getElementById('timer').textContent=formatTime(remaining);document.getElementById('pauseButton').textContent='Ⅱ  PAUSE';document.getElementById('nextCard').innerHTML=cardHTML(nextExercise(),nextIndex());go('rest');startTimer()}
-function nextIndex(){for(let i=0;i<7;i++){if(done[i]<3)return i}return 0}
+function renderLists(){
+ document.getElementById('workoutList').innerHTML=exercises.map(cardHTML).join('');
+ document.getElementById('listProgress').style.width=(done.reduce((a,b)=>a+b,0)/21*100)+'%';
+}
+function openExercise(i){
+ current=i;setNo=Math.min(done[i]+1,3);count=targetFor(exercises[i]);showDetail();go('detail');
+}
+function showDetail(){
+ const e=exercises[current],target=targetFor(e);
+ document.getElementById('detailHeader').textContent=e.name.toUpperCase();
+ const photo=document.getElementById('detailPhoto');
+ photo.onerror=function(){if(!this.dataset.fallback){this.dataset.fallback='1';this.src=fallbackPhotos[e.photo]}else{this.style.opacity='.2'}};
+ photo.dataset.fallback='';photo.src=photoUrl(e.photo);photo.alt=e.name;
+ document.getElementById('detailTitle').textContent=e.name;
+ document.getElementById('detailReps').textContent=e.seconds?target+' sec':target+' reps';
+ document.getElementById('detailRest').textContent=e.restText;
+ document.getElementById('detailInstruction').textContent=e.instruction;
+ document.getElementById('count').textContent=count;
+ document.getElementById('countUnit').textContent=e.seconds?' / '+target+' sec':' / '+target+' reps';
+ document.getElementById('doneButton').textContent=`DONE — SET ${setNo}/3`;
+}
+function changeCount(n){
+ count=Math.max(0,Math.min(targetFor(exercises[current]),count+n));
+ document.getElementById('count').textContent=count;
+}
+function startWorkout(){
+ current=done.findIndex(x=>x<3);
+ if(current<0)current=0;
+ setNo=Math.min(done[current]+1,3);
+ count=targetFor(exercises[current]);
+ showDetail();go('detail');
+}
+function finishSet(){
+ const e=exercises[current],target=targetFor(e);
+ if(count<target&&!confirm('Hindi pa kumpleto ang target. Markahan pa rin ang set bilang tapos?'))return;
+ done[current]=Math.max(done[current],setNo);
+ renderLists();renderHome();
+ if(done.every(x=>x>=3)){showComplete();go('complete');return}
+ remaining=e.rest;document.getElementById('timer').textContent=formatTime(remaining);
+ document.getElementById('pauseButton').textContent='Ⅱ  PAUSE';
+ document.getElementById('nextCard').innerHTML=cardHTML(nextExercise(),nextIndex());
+ go('rest');startTimer();
+}
+function nextIndex(){
+ // Finish all 3 sets of the current exercise before moving to the next unfinished exercise.
+ if(done[current]<3)return current;
+ for(let i=current+1;i<exercises.length;i++)if(done[i]<3)return i;
+ for(let i=0;i<current;i++)if(done[i]<3)return i;
+ return 0;
+}
 function nextExercise(){return exercises[nextIndex()]}
 function formatTime(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
-function startTimer(){clearInterval(timerId);running=true;timerId=setInterval(()=>{if(!running)return;remaining--;document.getElementById('timer').textContent=formatTime(Math.max(0,remaining));if(remaining<=0){clearInterval(timerId);running=false;try{if(navigator.vibrate)navigator.vibrate([250,100,250])}catch(e){};let ni=nextIndex();current=ni;setNo=done[ni]+1;count=exercises[ni].reps;showDetail();go('detail')}},1000)}
-function toggleTimer(){running=!running;document.getElementById('pauseButton').textContent=running?'Ⅱ  PAUSE':'▶  RESUME'}
-function resetTimer(){remaining=exercises[current].rest;document.getElementById('timer').textContent=formatTime(remaining)}
-function showComplete(){clearInterval(timerId);document.getElementById('checklist').innerHTML=exercises.map((e,i)=>`<div class="checkrow"><b>${done[i]>=3?'✓':'○'}</b>${e.name}</div>`).join('')}
-function resetWorkout(){clearInterval(timerId);running=false;done=Array(7).fill(0);current=0;setNo=1;count=exercises[0].reps;renderLists();renderHome();go('home')}
-renderHome();renderLists();
+function startTimer(){
+ clearInterval(timerId);running=true;
+ timerId=setInterval(()=>{
+  if(!running)return;
+  remaining=Math.max(0,remaining-1);
+  document.getElementById('timer').textContent=formatTime(remaining);
+  if(remaining<=0){
+   clearInterval(timerId);timerId=null;running=false;
+   try{if(navigator.vibrate)navigator.vibrate([250,100,250])}catch(e){}
+   const ni=nextIndex();current=ni;setNo=done[ni]+1;count=targetFor(exercises[ni]);showDetail();go('detail');
+  }
+ },1000);
+}
+function toggleTimer(){
+ if(remaining<=0)return;
+ running=!running;
+ document.getElementById('pauseButton').textContent=running?'Ⅱ  PAUSE':'▶  RESUME';
+}
+function resetTimer(){
+ remaining=exercises[current].rest;
+ document.getElementById('timer').textContent=formatTime(remaining);
+}
+function showComplete(){
+ clearInterval(timerId);timerId=null;running=false;
+ document.getElementById('checklist').innerHTML=exercises.map((e,i)=>`<div class="checkrow"><b>${done[i]>=3?'✓':'○'}</b>${e.name}</div>`).join('');
+ history.unshift({date:new Date().toLocaleString(),level:level,sets:done.reduce((a,b)=>a+b,0),exercises:exercises.filter((e,i)=>done[i]>=3).length});
+ history=history.slice(0,30);saveHistory();
+}
+function renderHistory(){
+ const box=document.querySelector('#history .next-card');
+ if(!history.length){
+  box.innerHTML='<h3>Keep showing up.</h3><p style="color:#bcb8dc">Wala pang workout record. Makikita rito ang session kapag natapos mo ang workout.</p><button class="primary" onclick="go(\'home\')">BACK TO HOME</button>';
+  return;
+ }
+ box.innerHTML='<h3>Workout History</h3>'+history.map((h,i)=>`<div class="checkrow"><b>${i+1}.</b> ${h.date}<br><small style="color:#bcb8dc">${h.level} · ${h.sets}/21 sets · ${h.exercises}/7 exercises complete</small></div>`).join('')+'<button class="secondary" onclick="clearHistory()">CLEAR HISTORY</button>';
+}
+function clearHistory(){if(confirm('Burahin ang lahat ng workout history?')){history=[];saveHistory();renderHistory()}}
+function resetWorkout(){
+ clearInterval(timerId);timerId=null;running=false;done=Array(7).fill(0);current=0;setNo=1;count=targetFor(exercises[0]);
+ renderLists();renderHome();go('home');
+}
+renderHome();renderLists();renderHistory();
+
 </script>
 </body>
 </html>
