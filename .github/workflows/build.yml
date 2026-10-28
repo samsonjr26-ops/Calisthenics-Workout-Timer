@@ -29,9 +29,23 @@ jobs:
           java-version: '17'
 
       - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        shell: bash
         run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          set -euo pipefail
+          SDKMANAGER="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)"
+          fi
+          if [ ! -x "$SDKMANAGER" ]; then
+            echo "ERROR: sdkmanager not found in Android SDK."
+            find "$ANDROID_HOME" -maxdepth 4 -type f -name sdkmanager
+            exit 1
+          fi
+          yes | "$SDKMANAGER" --licenses || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Locate HTML and prepare Android project
         shell: bash
@@ -42,7 +56,7 @@ jobs:
 
           if [ ! -f "$HTML_FILE" ]; then
             echo "ERROR: HTML file not found: $HTML_FILE"
-            echo "HTML files in repository root:"
+            echo "HTML files found in repository root:"
             find . -maxdepth 1 -type f -iname "*.html"
             exit 1
           fi
@@ -156,7 +170,7 @@ jobs:
           }
           EOF
 
-          echo "HTML and image assets prepared."
+          echo "HTML and image assets prepared:"
           find app/src/main/assets -maxdepth 3 -type f
 
       - name: Build APK
