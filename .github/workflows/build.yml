@@ -7,6 +7,7 @@ on:
     paths:
       - 'samson_calisthenics_app.html'
       - '*.png'
+      - '*.PNG'
       - '.github/workflows/build.yml'
 
 permissions:
@@ -28,12 +29,13 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
 
       - name: Install Android SDK packages
         run: |
           sdkmanager "platforms;android-35" \
                      "build-tools;35.0.0"
-          yes | sdkmanager --licenses
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -60,13 +62,13 @@ jobs:
           images=( *.png *.PNG )
 
           if [ ${#images[@]} -eq 0 ]; then
-            echo "ERROR: No PNG images found in repository root!"
+            echo "ERROR: No PNG images found!"
             exit 1
           fi
 
           cp "${images[@]}" app/src/main/assets/images/
 
-          echo "Images copied:"
+          echo "Images copied successfully:"
           ls -la app/src/main/assets/images
 
       - name: Create Android project files
@@ -127,12 +129,10 @@ jobs:
 
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
               <application
                   android:allowBackup="true"
                   android:label="Samson Calisthenics"
-                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
-                  android:usesCleartextTraffic="true">
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
                   <activity
                       android:name=".MainActivity"
