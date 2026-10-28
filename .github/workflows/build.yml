@@ -5,9 +5,10 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'samson_calisthenics_app.html'
-      - '*.png'
-      - '*.PNG'
+      - '**.html'
+      - 'images/**'
+      - 'logo.png'
+      - 'app/**'
       - '.github/workflows/build.yml'
 
 permissions:
@@ -29,49 +30,38 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-        with:
-          packages: platform-tools
 
-      - name: Install Android SDK
+      - name: Install Android SDK packages
         run: |
           sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.7'
-
-      - name: Copy HTML and images
+      - name: Locate HTML and prepare Android project
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
 
-          test -f samson_calisthenics_app.html || {
-            echo "ERROR: HTML file not found"
-            exit 1
-          }
+          HTML_FILE="samson_calesthenics_app.html"
 
-          mkdir -p app/src/main/assets/images
-          mkdir -p app/src/main/java/com/samson/calisthenics
-
-          cp samson_calisthenics_app.html \
-            app/src/main/assets/index.html
-
-          shopt -s nullglob
-          images=( *.png *.PNG )
-
-          if [ ${#images[@]} -eq 0 ]; then
-            echo "ERROR: No PNG images found"
+          if [ ! -f "$HTML_FILE" ]; then
+            echo "ERROR: $HTML_FILE not found in repository root."
+            echo "Update HTML_FILE in this workflow to match your exact filename."
+            echo "HTML files found:"
+            find . -maxdepth 1 -type f -iname "*.html"
             exit 1
           fi
 
-          cp "${images[@]}" app/src/main/assets/images/
-          echo "Images copied successfully"
+          mkdir -p app/src/main/assets/images
+          cp "$HTML_FILE" app/src/main/assets/index.html
 
-      - name: Create Android project
-        shell: bash
-        run: |
-          set -e
+          if [ -d images ]; then
+            cp -r images/. app/src/main/assets/images/
+          fi
+
+          if [ -f logo.png ]; then
+            cp logo.png app/src/main/assets/images/logo.png
+          fi
+
+          mkdir -p app/src/main/java/com/samson/calistenics
 
           cat > settings.gradle <<'EOF'
           pluginManagement {
@@ -98,10 +88,7 @@ jobs:
           }
           EOF
 
-          cat > gradle.properties <<'EOF'
-          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-          android.useAndroidX=true
-          EOF
+          echo "org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8" > gradle.properties
 
           cat > app/build.gradle <<'EOF'
           plugins {
@@ -109,15 +96,15 @@ jobs:
           }
 
           android {
-              namespace 'com.samson.calisthenics'
+              namespace 'com.samson.calistenics'
               compileSdk 35
 
               defaultConfig {
-                  applicationId 'com.samson.calisthenics'
+                  applicationId 'com.samson.calistenics'
                   minSdk 23
                   targetSdk 35
-                  versionCode 1
-                  versionName '1.0'
+                  versionCode 2
+                  versionName '1.1'
               }
           }
           EOF
@@ -125,29 +112,29 @@ jobs:
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <application
-                  android:allowBackup="true"
+                  android:theme="@android:style/Theme.Material.NoActionBar"
                   android:label="Samson Calisthenics"
-                  android:theme="@android:style/Theme.Material.Light.NoActionBar">
-
+                  android:usesCleartextTraffic="false"
+                  android:hardwareAccelerated="true">
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
                       <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
+                          <action android:name="android.intent.action.MAIN"/>
+                          <category android:name="android.intent.category.LAUNCHER"/>
                       </intent-filter>
                   </activity>
               </application>
           </manifest>
           EOF
 
-          cat > app/src/main/java/com/samson/calisthenics/MainActivity.java <<'EOF'
-          package com.samson.calisthenics;
+          cat > app/src/main/java/com/samson/calistenics/MainActivity.java <<'EOF'
+          package com.samson.calistenics;
 
           import android.app.Activity;
           import android.os.Bundle;
-          import android.webkit.WebSettings;
           import android.webkit.WebView;
+          import android.webkit.WebSettings;
           import android.webkit.WebViewClient;
 
           public class MainActivity extends Activity {
@@ -156,21 +143,24 @@ jobs:
                   super.onCreate(savedInstanceState);
 
                   WebView webView = new WebView(this);
-                  setContentView(webView);
-
                   WebSettings settings = webView.getSettings();
                   settings.setJavaScriptEnabled(true);
                   settings.setDomStorageEnabled(true);
-                  settings.setAllowFileAccess(true);
 
                   webView.setWebViewClient(new WebViewClient());
+                  setContentView(webView);
                   webView.loadUrl("file:///android_asset/index.html");
               }
           }
           EOF
 
+          echo "HTML and image assets prepared."
+          find app/src/main/assets -maxdepth 2 -type f
+
       - name: Build APK
-        run: gradle assembleDebug
+        run: |
+          gradle --version
+          gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
