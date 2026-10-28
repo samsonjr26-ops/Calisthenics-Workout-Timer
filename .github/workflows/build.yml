@@ -4,11 +4,9 @@ name: Build Samson Calisthenics APK
 on:
   workflow_dispatch:
   push:
-    paths:
-      - '**.html'
-      - 'images/**'
-      - 'logo.png'
-      - '.github/workflows/**'
+    branches:
+      - main
+      - master
 
 permissions:
   contents: read
@@ -27,55 +25,50 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Install Android SDK packages
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platforms;android-35 build-tools;35.0.0'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Locate HTML and prepare Android project
         shell: bash
         run: |
           set -euo pipefail
 
-          SDK_ROOT="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
-          SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -type f -name sdkmanager 2>/dev/null | head -n 1)"
+          HTML_FILE=""
 
-          if [ -z "$SDKMANAGER" ]; then
-            echo "ERROR: sdkmanager was not found."
-            echo "ANDROID_HOME=$SDK_ROOT"
+          if [ -f "samson_calesthenics_app.html" ]; then
+            HTML_FILE="samson_calesthenics_app.html"
+          else
+            HTML_FILE="$(find . -type f -iname '*.html' \
+              ! -path './.git/*' \
+              ! -path './.gradle/*' | head -n 1 || true)"
+          fi
+
+          if [ -z "$HTML_FILE" ]; then
+            echo "ERROR: Walang HTML file na nakita sa repository."
             exit 1
           fi
 
-          echo "Using SDK manager: $SDKMANAGER"
+          echo "Gagamitin ang HTML: $HTML_FILE"
 
-          yes | "$SDKMANAGER" --licenses || true
+          mkdir -p app/src/main/assets
+          mkdir -p app/src/main/java/com/samson/calistenics
 
-          "$SDKMANAGER" \
-            "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
-
-      - name: Prepare Android project
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          HTML_FILE="samson_calesthenics_app.html"
-
-          if [ ! -f "$HTML_FILE" ]; then
-            echo "ERROR: HTML file not found: $HTML_FILE"
-            echo "HTML files found:"
-            find . -maxdepth 1 -type f -iname "*.html"
-            exit 1
-          fi
-
-          mkdir -p app/src/main/assets/images
           cp "$HTML_FILE" app/src/main/assets/index.html
 
-          if [ -d images ]; then
-            cp -r images/. app/src/main/assets/images/
+          if [ -d "images" ]; then
+            cp -R images app/src/main/assets/images
           fi
 
-          if [ -f logo.png ]; then
-            cp logo.png app/src/main/assets/images/logo.png
+          if [ -f "logo.png" ]; then
+            cp logo.png app/src/main/assets/logo.png
           fi
-
-          mkdir -p app/src/main/java/com/samson/calistenics
 
           cat > settings.gradle <<'EOF'
           pluginManagement {
@@ -100,13 +93,8 @@ jobs:
 
           cat > build.gradle <<'EOF'
           plugins {
-              id 'com.android.application' version '8.5.2' apply false
+              id 'com.android.application' version '8.7.3' apply false
           }
-          EOF
-
-          cat > gradle.properties <<'EOF'
-          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-          android.useAndroidX=true
           EOF
 
           cat > app/build.gradle <<'EOF'
@@ -122,8 +110,8 @@ jobs:
                   applicationId 'com.samson.calistenics'
                   minSdk 23
                   targetSdk 35
-                  versionCode 2
-                  versionName '1.1'
+                  versionCode 1
+                  versionName '1.0'
               }
           }
           EOF
@@ -131,16 +119,20 @@ jobs:
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <application
-                  android:theme="@android:style/Theme.Material.NoActionBar"
                   android:label="Samson Calisthenics"
-                  android:hardwareAccelerated="true">
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
+                  android:usesCleartextTraffic="true"
+                  android:allowBackup="false">
+
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
+
                       <intent-filter>
-                          <action android:name="android.intent.action.MAIN"/>
-                          <category android:name="android.intent.category.LAUNCHER"/>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
+
                   </activity>
               </application>
           </manifest>
@@ -151,32 +143,49 @@ jobs:
 
           import android.app.Activity;
           import android.os.Bundle;
+          import android.webkit.WebChromeClient;
           import android.webkit.WebView;
-          import android.webkit.WebSettings;
           import android.webkit.WebViewClient;
 
           public class MainActivity extends Activity {
+              private WebView webView;
+
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
 
-                  WebView webView = new WebView(this);
-                  WebSettings settings = webView.getSettings();
-                  settings.setJavaScriptEnabled(true);
-                  settings.setDomStorageEnabled(true);
-
+                  webView = new WebView(this);
+                  webView.getSettings().setJavaScriptEnabled(true);
+                  webView.getSettings().setDomStorageEnabled(true);
+                  webView.getSettings().setAllowFileAccess(true);
                   webView.setWebViewClient(new WebViewClient());
+                  webView.setWebChromeClient(new WebChromeClient());
+
                   setContentView(webView);
                   webView.loadUrl("file:///android_asset/index.html");
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (webView != null && webView.canGoBack()) {
+                      webView.goBack();
+                  } else {
+                      super.onBackPressed();
+                  }
+              }
+
+              @Override
+              protected void onDestroy() {
+                  if (webView != null) {
+                      webView.destroy();
+                  }
+                  super.onDestroy();
               }
           }
           EOF
 
-          echo "Prepared HTML and image assets."
-          find app/src/main/assets -maxdepth 3 -type f
-
       - name: Build APK
-        run: gradle assembleDebug
+        run: gradle --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
