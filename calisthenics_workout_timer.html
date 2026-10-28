@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#080611">
 <title>Samson Calisthenics</title>
+
 <style>
 :root {
   --bg:#080611;
@@ -66,7 +67,10 @@ p{color:var(--muted)}
   background:linear-gradient(110deg,#100d1d,#0a0813);
   border:1px solid var(--line);border-radius:19px;min-width:0;
 }
-.exercise-card img{width:112px;height:100px;flex-shrink:0;object-fit:cover;border-radius:12px;background:#1b1630;border:1px solid #29223e}
+.exercise-card img{
+  width:112px;height:100px;flex-shrink:0;object-fit:cover;
+  border-radius:12px;background:#1b1630;border:1px solid #29223e
+}
 .exercise-info{flex:1;min-width:0}
 .exercise-info h3{font-size:13px;margin:0 0 8px}
 .exercise-info p{font-size:13px;margin:0 0 8px}
@@ -81,9 +85,18 @@ p{color:var(--muted)}
 .info-panel{padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:16px;margin:12px 0}
 .info-panel h3{font-size:13px;color:var(--purple2);margin:0 0 12px}
 .info-panel li{margin:9px 0;color:#ddd6ee;font-size:14px;line-height:1.45}
-.timer{font-size:42px;font-weight:bold;text-align:center;margin:18px 0}
+
+.timer-label{
+  text-align:center;color:var(--purple2);font-size:12px;
+  letter-spacing:2px;font-weight:bold;margin-top:20px
+}
+.timer{font-size:48px;font-weight:bold;text-align:center;margin:15px 0}
+.timer-note{font-size:12px;line-height:1.5;text-align:center;color:var(--muted)}
 .timer-controls{display:flex;gap:10px}
-.timer-controls button{flex:1;padding:13px;border-radius:12px;border:1px solid var(--line);background:#181128;color:white}
+.timer-controls button{
+  flex:1;padding:13px;border-radius:12px;
+  border:1px solid var(--line);background:#181128;color:white
+}
 .nav{
   position:fixed;bottom:0;left:0;right:0;z-index:5;
   display:grid;grid-template-columns:repeat(4,1fr);
@@ -97,8 +110,10 @@ p{color:var(--muted)}
 .empty{padding:25px 10px;text-align:center;color:var(--muted)}
 </style>
 </head>
+
 <body>
 <div class="app">
+
   <header class="topbar">
     <div>
       <div class="brand-small">DISCIPLINE BUILDS FREEDOM</div>
@@ -121,6 +136,7 @@ p{color:var(--muted)}
       <button class="difficulty medium" onclick="setDifficulty('Medium',this)">MEDIUM</button>
       <button class="difficulty hard" onclick="setDifficulty('Hard',this)">HARD</button>
     </div>
+
     <button class="primary" onclick="startWorkout()">▶ &nbsp; START WORKOUT</button>
     <div class="section-title">YOUR TRAINING PLAN</div>
     <div id="home-list" class="exercise-list"></div>
@@ -139,38 +155,55 @@ p{color:var(--muted)}
       <button class="back" onclick="showPage('workout')">‹</button>
       <h2 id="detail-title">EXERCISE</h2>
     </div>
+
     <img id="detail-image" class="detail-image" src="" alt="Exercise demonstration">
     <h2 id="detail-name" style="margin-top:16px"></h2>
     <p id="detail-reps"></p>
+
     <div class="info-panel">
       <h3>HOW TO DO IT</h3>
       <ol id="detail-steps"></ol>
     </div>
+
     <div class="info-panel">
       <h3>KEY TIPS</h3>
       <ul id="detail-tips"></ul>
     </div>
+
+    <div class="timer-label" id="timer-label">STOPWATCH</div>
     <div class="timer" id="timer">00:00</div>
+    <p class="timer-note" id="timer-note">Gamitin ang timer habang nag-eehersisyo.</p>
+
     <div class="timer-controls">
       <button onclick="toggleTimer()" id="timer-button">▶ START TIMER</button>
       <button onclick="resetTimer()">↻ RESET</button>
     </div>
-    <button class="primary" style="margin-top:15px" onclick="completeExercise()">✓ &nbsp; MARK AS COMPLETED</button>
+
+    <button class="primary" style="margin-top:15px" onclick="completeExercise()">
+      ✓ &nbsp; MARK AS COMPLETED
+    </button>
   </section>
 
   <section id="history" class="page">
-    <div class="page-heading"><h2>TRAINING HISTORY</h2><p>Your completed exercises</p></div>
+    <div class="page-heading">
+      <h2>TRAINING HISTORY</h2>
+      <p>Your completed exercises</p>
+    </div>
     <div id="history-list"></div>
   </section>
 
   <section id="settings" class="page">
-    <div class="page-heading"><h2>SETTINGS</h2><p>Samson Calisthenics</p></div>
+    <div class="page-heading">
+      <h2>SETTINGS</h2>
+      <p>Samson Calisthenics</p>
+    </div>
     <div class="setting-item">🏋️ Training level: <strong id="current-level">Easy</strong></div>
     <div class="setting-item">📱 Version 1.0</div>
     <div class="setting-item">🌙 Dark theme enabled</div>
     <div class="setting-item">Images are loaded from the app's local assets.</div>
     <button class="primary" onclick="showPage('home')">BACK TO HOME</button>
   </section>
+
 </div>
 
 <nav class="nav">
@@ -182,111 +215,352 @@ p{color:var(--muted)}
 
 <script>
 const exercises = [
- {name:"Pull-ups",file:"pullup.png",reps:[8,12,15],unit:"reps",
-  steps:["Grip the bar slightly wider than shoulder-width.","Hang with your arms extended.","Pull yourself up until your chin reaches the bar.","Lower yourself slowly with control."],
-  tips:["Keep your core tight.","Avoid swinging.","Use a safe, stable pull-up bar."]},
- {name:"Pike Push-ups",file:"pike.png",reps:[8,12,15],unit:"reps",
-  steps:["Start in an inverted V position with hips raised.","Place hands slightly wider than shoulder-width.","Bend elbows and lower your head toward the floor.","Push back to the starting position."],
-  tips:["Keep hips high.","Move slowly and with control.","Stop if you feel pain."]},
- {name:"Decline Push-ups",file:"decline.png",reps:[10,15,20],unit:"reps",
-  steps:["Place your feet on a stable, low bench.","Position hands on the floor slightly wider than shoulders.","Lower your chest with control.","Push back up while keeping your body straight."],
-  tips:["Use a stable support.","Keep your core engaged.","Avoid arching your lower back."]},
- {name:"Standard Push-ups",file:"pushups.png",reps:[10,20,30],unit:"reps",
-  steps:["Start in a high plank with hands under your shoulders.","Keep your head, hips and heels aligned.","Lower your chest toward the floor.","Push back up without letting your hips sag."],
-  tips:["Keep elbows at a comfortable angle.","Breathe steadily.","Use knee push-ups if needed."]},
- {name:"Bench Dips",file:"dips.png",reps:[8,15,20],unit:"reps",
-  steps:["Place hands on a stable bench behind you.","Move your hips just in front of the bench.","Bend your elbows and lower only as far as comfortable.","Push through your hands to return up."],
-  tips:["Keep shoulders comfortable.","Do not lower too deeply.","Make sure the bench cannot slide."]},
- {name:"Squat Jumps",file:"jumps.png",reps:[10,20,25],unit:"reps",
-  steps:["Stand with feet about shoulder-width apart.","Lower into a comfortable squat.","Jump upward with control.","Land softly and bend your knees."],
-  tips:["Land quietly.","Use a clear, non-slippery space.","Stop if you feel pain or dizziness."]},
- {name:"Forearm Plank",file:"plank.png",reps:[30,45,60],unit:"seconds",
-  steps:["Place forearms on the floor with elbows under shoulders.","Extend your legs behind you.","Keep your body in a straight line.","Breathe normally while holding the position."],
-  tips:["Do not hold your breath.","Avoid dropping your hips.","Rest when your form breaks."]}
+ {
+  name:"Pull-ups",file:"pullup.png",reps:[8,12,15],unit:"reps",
+  steps:[
+   "Grip the bar slightly wider than shoulder-width.",
+   "Hang with your arms extended.",
+   "Pull yourself up until your chin reaches the bar.",
+   "Lower yourself slowly with control."
+  ],
+  tips:[
+   "Keep your core tight.",
+   "Avoid swinging.",
+   "Use a safe, stable pull-up bar."
+  ]
+ },
+ {
+  name:"Pike Push-ups",file:"pike.png",reps:[8,12,15],unit:"reps",
+  steps:[
+   "Start in an inverted V position with hips raised.",
+   "Place hands slightly wider than shoulder-width.",
+   "Bend elbows and lower your head toward the floor.",
+   "Push back to the starting position."
+  ],
+  tips:[
+   "Keep hips high.",
+   "Move slowly and with control.",
+   "Stop if you feel pain."
+  ]
+ },
+ {
+  name:"Decline Push-ups",file:"decline.png",reps:[10,15,20],unit:"reps",
+  steps:[
+   "Place your feet on a stable, low bench.",
+   "Position hands on the floor slightly wider than shoulders.",
+   "Lower your chest with control.",
+   "Push back up while keeping your body straight."
+  ],
+  tips:[
+   "Use a stable support.",
+   "Keep your core engaged.",
+   "Avoid arching your lower back."
+  ]
+ },
+ {
+  name:"Standard Push-ups",file:"pushups.png",reps:[10,20,30],unit:"reps",
+  steps:[
+   "Start in a high plank with hands under your shoulders.",
+   "Keep your head, hips and heels aligned.",
+   "Lower your chest toward the floor.",
+   "Push back up without letting your hips sag."
+  ],
+  tips:[
+   "Keep elbows at a comfortable angle.",
+   "Breathe steadily.",
+   "Use knee push-ups if needed."
+  ]
+ },
+ {
+  name:"Bench Dips",file:"dips.png",reps:[8,15,20],unit:"reps",
+  steps:[
+   "Place hands on a stable bench behind you.",
+   "Move your hips just in front of the bench.",
+   "Bend your elbows and lower only as far as comfortable.",
+   "Push through your hands to return up."
+  ],
+  tips:[
+   "Keep shoulders comfortable.",
+   "Do not lower too deeply.",
+   "Make sure the bench cannot slide."
+  ]
+ },
+ {
+  name:"Squat Jumps",file:"jumps.png",reps:[10,20,25],unit:"reps",
+  steps:[
+   "Stand with feet about shoulder-width apart.",
+   "Lower into a comfortable squat.",
+   "Jump upward with control.",
+   "Land softly and bend your knees."
+  ],
+  tips:[
+   "Land quietly.",
+   "Use a clear, non-slippery space.",
+   "Stop if you feel pain or dizziness."
+  ]
+ },
+ {
+  name:"Forearm Plank",file:"plank.png",reps:[30,45,60],unit:"seconds",
+  steps:[
+   "Place forearms on the floor with elbows under shoulders.",
+   "Extend your legs behind you.",
+   "Keep your body in a straight line.",
+   "Breathe normally while holding the position."
+  ],
+  tips:[
+   "Do not hold your breath.",
+   "Avoid dropping your hips.",
+   "Rest when your form breaks."
+  ]
+ }
 ];
 
-let difficulty="Easy", selected=0, elapsed=0, timerInterval=null, timerRunning=false;
-let completed=[];
-try { completed=JSON.parse(localStorage.getItem("samsonHistory")||"[]"); } catch(e) {}
+let difficulty = "Easy";
+let selected = 0;
+let elapsed = 0;
+let remaining = 0;
+let timerInterval = null;
+let timerRunning = false;
+let timerMode = "stopwatch";
+let completed = [];
 
-function levelIndex(){return difficulty==="Easy"?0:difficulty==="Medium"?1:2}
-function repsText(ex){return ex.unit==="seconds"?ex.reps[levelIndex()]+" seconds":ex.reps[levelIndex()]+" reps"}
-function imagePath(ex){return "images/"+ex.file}
+try {
+  completed = JSON.parse(localStorage.getItem("samsonHistory") || "[]");
+} catch (e) {
+  completed = [];
+}
 
-function card(ex,index){
- return `<div class="exercise-card" onclick="openExercise(${index})">
-   <img src="${imagePath(ex)}" alt="${ex.name}" loading="lazy"
-    onerror="this.onerror=null;this.style.display='none'">
-   <div class="exercise-info"><h3>${ex.name.toUpperCase()}</h3>
-   <p>${repsText(ex)}</p><span class="sets">♧ 3 SETS</span></div>
-   <span class="arrow">›</span>
- </div>`;
+function levelIndex() {
+  return difficulty === "Easy" ? 0 : difficulty === "Medium" ? 1 : 2;
 }
-function renderLists(){
- document.getElementById("home-list").innerHTML=exercises.map(card).join("");
- document.getElementById("workout-list").innerHTML=exercises.map(card).join("");
+
+function repsText(ex) {
+  return ex.unit === "seconds"
+    ? ex.reps[levelIndex()] + " seconds"
+    : ex.reps[levelIndex()] + " reps";
 }
-function setDifficulty(level,button){
- difficulty=level;
- document.querySelectorAll(".difficulty").forEach(b=>b.classList.remove("active"));
- button.classList.add("active");
- document.getElementById("current-level").textContent=level;
- renderLists();
+
+function imagePath(ex) {
+  return "images/" + ex.file;
 }
-function showPage(page){
- stopTimer();
- document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
- document.getElementById(page).classList.add("active");
- document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
- if(page==="history")renderHistory();
- window.scrollTo(0,0);
+
+function card(ex, index) {
+  return `<div class="exercise-card" onclick="openExercise(${index})">
+    <img src="${imagePath(ex)}" alt="${ex.name}" loading="lazy"
+      onerror="this.onerror=null;this.style.display='none'">
+    <div class="exercise-info">
+      <h3>${ex.name.toUpperCase()}</h3>
+      <p>${repsText(ex)}</p>
+      <span class="sets">♧ 3 SETS</span>
+    </div>
+    <span class="arrow">›</span>
+  </div>`;
 }
-function startWorkout(){showPage("workout")}
-function openExercise(index){
- selected=index;
- const ex=exercises[index];
- document.getElementById("detail-title").textContent=ex.name.toUpperCase();
- document.getElementById("detail-name").textContent=ex.name;
- document.getElementById("detail-reps").textContent=repsText(ex)+" · 3 sets";
- const img=document.getElementById("detail-image");
- img.style.display="block";
- img.src=imagePath(ex);
- img.onerror=()=>{img.style.display="none";};
- document.getElementById("detail-steps").innerHTML=ex.steps.map(s=>"<li>"+s+"</li>").join("");
- document.getElementById("detail-tips").innerHTML=ex.tips.map(s=>"<li>"+s+"</li>").join("");
- resetTimer();
- showPage("detail");
+
+function renderLists() {
+  document.getElementById("home-list").innerHTML =
+    exercises.map((ex, i) => card(ex, i)).join("");
+
+  document.getElementById("workout-list").innerHTML =
+    exercises.map((ex, i) => card(ex, i)).join("");
 }
-function toggleTimer(){
- if(timerRunning){stopTimer();return;}
- timerRunning=true;
- document.getElementById("timer-button").textContent="Ⅱ PAUSE TIMER";
- timerInterval=setInterval(()=>{
-  elapsed++;
-  const m=String(Math.floor(elapsed/60)).padStart(2,"0");
-  const s=String(elapsed%60).padStart(2,"0");
-  document.getElementById("timer").textContent=m+":"+s;
- },1000);
+
+function setDifficulty(level, button) {
+  difficulty = level;
+
+  document.querySelectorAll(".difficulty").forEach(b => {
+    b.classList.remove("active");
+  });
+
+  button.classList.add("active");
+  document.getElementById("current-level").textContent = level;
+  renderLists();
 }
-function stopTimer(){
- if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
- timerRunning=false;
- const b=document.getElementById("timer-button");
- if(b)b.textContent="▶ START TIMER";
+
+function showPage(page) {
+  stopTimer();
+
+  document.querySelectorAll(".page").forEach(p => {
+    p.classList.remove("active");
+  });
+
+  document.getElementById(page).classList.add("active");
+
+  document.querySelectorAll(".nav button").forEach(b => {
+    b.classList.toggle("active", b.dataset.page === page);
+  });
+
+  if (page === "history") renderHistory();
+
+  window.scrollTo(0, 0);
 }
-function resetTimer(){stopTimer();elapsed=0;document.getElementById("timer").textContent="00:00"}
-function completeExercise(){
- const ex=exercises[selected];
- completed.unshift({name:ex.name,date:new Date().toLocaleString(),level:difficulty});
- try{localStorage.setItem("samsonHistory",JSON.stringify(completed));}catch(e){}
- alert(ex.name+" marked as completed!");
- showPage("history");
+
+function startWorkout() {
+  showPage("workout");
 }
-function renderHistory(){
- const target=document.getElementById("history-list");
- if(!completed.length){target.innerHTML='<div class="empty">No completed exercises yet.<br>Finish an exercise to see it here.</div>';return;}
- target.innerHTML=completed.map(x=>`<div class="history-item"><strong>✓ ${x.name}</strong><p>${x.level} · ${x.date}</p></div>`).join("");
+
+function openExercise(index) {
+  selected = index;
+  const ex = exercises[index];
+
+  document.getElementById("detail-title").textContent =
+    ex.name.toUpperCase();
+
+  document.getElementById("detail-name").textContent = ex.name;
+  document.getElementById("detail-reps").textContent =
+    repsText(ex) + " · 3 sets";
+
+  const img = document.getElementById("detail-image");
+  img.style.display = "block";
+  img.src = imagePath(ex);
+
+  img.onerror = () => {
+    img.style.display = "none";
+  };
+
+  document.getElementById("detail-steps").innerHTML =
+    ex.steps.map(s => "<li>" + s + "</li>").join("");
+
+  document.getElementById("detail-tips").innerHTML =
+    ex.tips.map(s => "<li>" + s + "</li>").join("");
+
+  timerMode = ex.unit === "seconds" ? "countdown" : "stopwatch";
+
+  resetTimer();
+
+  document.getElementById("timer-label").textContent =
+    timerMode === "countdown" ? "PLANK COUNTDOWN" : "STOPWATCH";
+
+  document.getElementById("timer-note").textContent =
+    timerMode === "countdown"
+      ? "Pindutin ang START PLANK para simulan ang countdown."
+      : "Gamitin ang stopwatch habang ginagawa ang exercise.";
+
+  document.getElementById("timer-button").textContent =
+    timerMode === "countdown" ? "▶ START PLANK" : "▶ START TIMER";
+
+  showPage("detail");
 }
+
+function formatTime(seconds) {
+  seconds = Math.max(0, seconds);
+
+  const minutes = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const secs = String(seconds % 60).padStart(2, "0");
+
+  return minutes + ":" + secs;
+}
+
+function updateTimerDisplay() {
+  document.getElementById("timer").textContent =
+    formatTime(timerMode === "countdown" ? remaining : elapsed);
+}
+
+function toggleTimer() {
+  if (timerRunning) {
+    stopTimer();
+    return;
+  }
+
+  if (timerMode === "countdown" && remaining <= 0) {
+    remaining = exercises[selected].reps[levelIndex()];
+    updateTimerDisplay();
+  }
+
+  timerRunning = true;
+
+  document.getElementById("timer-button").textContent =
+    timerMode === "countdown" ? "Ⅱ PAUSE PLANK" : "Ⅱ PAUSE TIMER";
+
+  timerInterval = setInterval(() => {
+    if (timerMode === "countdown") {
+      remaining = Math.max(0, remaining - 1);
+      updateTimerDisplay();
+
+      if (remaining === 0) {
+        stopTimer();
+
+        document.getElementById("timer-button").textContent =
+          "✓ PLANK COMPLETE";
+
+        document.getElementById("timer-note").textContent =
+          "Tapos na ang timer. Magpahinga at huminga nang normal.";
+
+        try {
+          if (navigator.vibrate) navigator.vibrate([250, 120, 250]);
+        } catch (e) {}
+
+        alert("Tapos na ang plank timer! Magpahinga bago ang susunod na set.");
+      }
+    } else {
+      elapsed++;
+      updateTimerDisplay();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  timerRunning = false;
+
+  const button = document.getElementById("timer-button");
+
+  if (button) {
+    button.textContent =
+      timerMode === "countdown" ? "▶ START PLANK" : "▶ START TIMER";
+  }
+}
+
+function resetTimer() {
+  stopTimer();
+  elapsed = 0;
+
+  remaining =
+    exercises[selected] && exercises[selected].unit === "seconds"
+      ? exercises[selected].reps[levelIndex()]
+      : 0;
+
+  updateTimerDisplay();
+}
+
+function completeExercise() {
+  const ex = exercises[selected];
+
+  completed.unshift({
+    name: ex.name,
+    date: new Date().toLocaleString(),
+    level: difficulty
+  });
+
+  try {
+    localStorage.setItem("samsonHistory", JSON.stringify(completed));
+  } catch (e) {}
+
+  alert(ex.name + " marked as completed!");
+  showPage("history");
+}
+
+function renderHistory() {
+  const target = document.getElementById("history-list");
+
+  if (!completed.length) {
+    target.innerHTML =
+      '<div class="empty">No completed exercises yet.<br>Finish an exercise to see it here.</div>';
+    return;
+  }
+
+  target.innerHTML = completed.map(x =>
+    `<div class="history-item">
+      <strong>✓ ${x.name}</strong>
+      <p>${x.level} · ${x.date}</p>
+    </div>`
+  ).join("");
+}
+
 renderLists();
 </script>
 </body>
