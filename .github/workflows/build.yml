@@ -1,12 +1,12 @@
+
 name: Build Samson Calisthenics APK
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - '*.html'
-      - 'images/**'
-      - 'logo.png'
+      - 'samson_calisthenics_app.html'
+      - '*.png'
       - '.github/workflows/build.yml'
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -29,30 +29,50 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager "platforms;android-35" \
+                     "build-tools;35.0.0"
+          yes | sdkmanager --licenses
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
 
-      - name: Prepare Android project and copy HTML
+      - name: Prepare app and copy images
         shell: bash
         run: |
-          set -euo pipefail
+          set -e
 
-          HTML_FILE="$(find . -maxdepth 1 -type f -name '*.html' -print -quit)"
-          if [ -z "${HTML_FILE}" ]; then
-            echo "ERROR: Walang .html file sa root ng repository."
-            echo "Ilagay ang Samson Calisthenics HTML file sa pangunahing folder ng repository."
+          if [ ! -f "samson_calisthenics_app.html" ]; then
+            echo "ERROR: samson_calisthenics_app.html not found!"
             exit 1
           fi
 
-          mkdir -p app/src/main/assets app/src/main/java/com/samson/calisthenics
-          cp "$HTML_FILE" app/src/main/assets/index.html
+          mkdir -p app/src/main/assets/images
+          mkdir -p app/src/main/java/com/samson/calisthenics
 
-          if [ -d images ]; then
-            mkdir -p app/src/main/assets/images
-            cp -R images/. app/src/main/assets/images/
+          cp samson_calisthenics_app.html \
+            app/src/main/assets/index.html
+
+          shopt -s nullglob
+          images=( *.png *.PNG )
+
+          if [ ${#images[@]} -eq 0 ]; then
+            echo "ERROR: No PNG images found in repository root!"
+            exit 1
           fi
+
+          cp "${images[@]}" app/src/main/assets/images/
+
+          echo "Images copied:"
+          ls -la app/src/main/assets/images
+
+      - name: Create Android project files
+        shell: bash
+        run: |
+          set -e
 
           cat > settings.gradle <<'EOF'
           pluginManagement {
@@ -62,6 +82,7 @@ jobs:
                   gradlePluginPortal()
               }
           }
+
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
               repositories {
@@ -69,6 +90,7 @@ jobs:
                   mavenCentral()
               }
           }
+
           rootProject.name = "SamsonCalisthenics"
           include(":app")
           EOF
@@ -105,20 +127,22 @@ jobs:
 
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.INTERNET" />
+
               <application
                   android:allowBackup="true"
                   android:label="Samson Calisthenics"
-                  android:theme="@android:style/Theme.Material.NoActionBar"
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
                   android:usesCleartextTraffic="true">
+
                   <activity
                       android:name=".MainActivity"
-                      android:exported="true"
-                      android:screenOrientation="portrait">
+                      android:exported="true">
+
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
                           <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
+
                   </activity>
               </application>
           </manifest>
@@ -129,33 +153,38 @@ jobs:
 
           import android.app.Activity;
           import android.os.Bundle;
-          import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
-          import android.view.Window;
-          import android.view.WindowManager;
 
           public class MainActivity extends Activity {
+              private WebView webView;
+
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
-                  requestWindowFeature(Window.FEATURE_NO_TITLE);
-                  getWindow().setFlags(
-                      WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                      WindowManager.LayoutParams.FLAG_FULLSCREEN
-                  );
 
-                  WebView webView = new WebView(this);
+                  webView = new WebView(this);
+                  setContentView(webView);
+
                   WebSettings settings = webView.getSettings();
                   settings.setJavaScriptEnabled(true);
                   settings.setDomStorageEnabled(true);
                   settings.setAllowFileAccess(true);
-                  settings.setLoadsImagesAutomatically(true);
+
                   webView.setWebViewClient(new WebViewClient());
-                  webView.setWebChromeClient(new WebChromeClient());
-                  setContentView(webView);
-                  webView.loadUrl("file:///android_asset/index.html");
+                  webView.loadUrl(
+                      "file:///android_asset/index.html"
+                  );
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (webView != null && webView.canGoBack()) {
+                      webView.goBack();
+                  } else {
+                      super.onBackPressed();
+                  }
               }
           }
           EOF
@@ -163,7 +192,7 @@ jobs:
       - name: Build APK
         run: gradle assembleDebug
 
-      - name: Upload APK
+      - name: Upload Samson Calisthenics APK
         uses: actions/upload-artifact@v4
         with:
           name: Samson-Calisthenics-APK
