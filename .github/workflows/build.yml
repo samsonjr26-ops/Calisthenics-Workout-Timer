@@ -29,11 +29,9 @@ jobs:
           java-version: '17'
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK packages
         run: |
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Locate HTML and prepare Android project
         shell: bash
@@ -43,9 +41,8 @@ jobs:
           HTML_FILE="samson_calesthenics_app.html"
 
           if [ ! -f "$HTML_FILE" ]; then
-            echo "ERROR: $HTML_FILE not found in repository root."
-            echo "Update HTML_FILE in this workflow to match your exact filename."
-            echo "HTML files found:"
+            echo "ERROR: HTML file not found: $HTML_FILE"
+            echo "HTML files in repository root:"
             find . -maxdepth 1 -type f -iname "*.html"
             exit 1
           fi
@@ -71,6 +68,7 @@ jobs:
                   gradlePluginPortal()
               }
           }
+
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
               repositories {
@@ -78,6 +76,7 @@ jobs:
                   mavenCentral()
               }
           }
+
           rootProject.name = "SamsonCalisthenics"
           include(":app")
           EOF
@@ -88,7 +87,10 @@ jobs:
           }
           EOF
 
-          echo "org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8" > gradle.properties
+          cat > gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          android.useAndroidX=true
+          EOF
 
           cat > app/build.gradle <<'EOF'
           plugins {
@@ -155,7 +157,7 @@ jobs:
           EOF
 
           echo "HTML and image assets prepared."
-          find app/src/main/assets -maxdepth 2 -type f
+          find app/src/main/assets -maxdepth 3 -type f
 
       - name: Build APK
         run: |
