@@ -35,7 +35,7 @@ button{font:inherit;cursor:pointer;color:inherit;border:0}button:focus-visible{o
  <div class="status"><span>9:41</span><span>▮▮▮  ◉  ▰</span></div>
  <section id="home" class="screen active">
   <div class="hero">
-   <img alt="Athlete training in a dark gym" src="images/pullup.png">
+   <img alt="Athlete training in a dark gym" src="images/file_00000000c3388207a770f8a294cd42f2.png">
    <div class="brand"><div class="helmet">♜</div><h1>SAMSON <span>CALISTHENICS</span></h1><div class="tagline">DISCIPLINE BUILDS FREEDOM</div></div>
    <div class="hero-caption">BUILD STRENGTH · ONE REP AT A TIME</div>
   </div>
@@ -93,7 +93,7 @@ const exercises=[
  {name:'Squat Jumps',reps:20,seconds:0,rest:120,restText:'2 min',photo:'jumps.png',instruction:'Magsquat, tumalon pataas, at lumapag nang marahan bago bumalik sa squat position.',sets:3},
  {name:'Forearm Plank',reps:60,seconds:1,rest:75,restText:'1 min 15 sec',photo:'plank.png',instruction:'Ipatong ang mga siko sa sahig at panatilihing tuwid ang katawan. Hawakan ang posisyon nang 60 segundo.',sets:3}
 ];
-const photoUrl=(file)=>`images/${file}`;
+const photoUrl=(id)=>`images/${id}`;
 let current=0,setNo=1,count=12,level='EASY',remaining=120,timerId=null,running=false,done=Array(7).fill(0);
 function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));if(id==='workout')renderLists();if(id==='home')renderHome()}
 function setDifficulty(l,btn){level=l;document.querySelectorAll('.difficulty button').forEach(b=>b.classList.toggle('selected',b===btn))}
