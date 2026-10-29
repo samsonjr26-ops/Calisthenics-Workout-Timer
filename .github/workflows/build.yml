@@ -39,7 +39,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          HTML_FILE="samson_calesthenics_app.html"
+          HTML_FILE="calisthenics_workout_timer.html"
 
           if [ ! -f "$HTML_FILE" ]; then
             echo "ERROR: Hindi makita ang $HTML_FILE"
@@ -148,7 +148,6 @@ jobs:
                   super.onCreate(savedInstanceState);
 
                   webView = new WebView(this);
-
                   webView.getSettings().setJavaScriptEnabled(true);
                   webView.getSettings().setDomStorageEnabled(true);
                   webView.getSettings().setAllowFileAccess(true);
