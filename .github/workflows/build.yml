@@ -1,4 +1,3 @@
-
 name: Build Samson Calisthenics APK
 
 on:
@@ -35,23 +34,18 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Locate HTML and prepare Android project
+      - name: Prepare Android project
         shell: bash
         run: |
           set -euo pipefail
 
-          HTML_FILE=""
+          HTML_FILE="samson_calesthenics_app.html"
 
-          if [ -f "samson_calesthenics_app.html" ]; then
-            HTML_FILE="samson_calesthenics_app.html"
-          else
-            HTML_FILE="$(find . -type f -iname '*.html' \
-              ! -path './.git/*' \
-              ! -path './.gradle/*' | head -n 1 || true)"
-          fi
-
-          if [ -z "$HTML_FILE" ]; then
-            echo "ERROR: Walang HTML file na nakita sa repository."
+          if [ ! -f "$HTML_FILE" ]; then
+            echo "ERROR: Hindi makita ang $HTML_FILE"
+            echo "Mga HTML file sa repository:"
+            find . -maxdepth 3 -type f -iname '*.html' \
+              ! -path './.git/*' | sort
             exit 1
           fi
 
@@ -63,7 +57,7 @@ jobs:
           cp "$HTML_FILE" app/src/main/assets/index.html
 
           if [ -d "images" ]; then
-            cp -R images app/src/main/assets/images
+            cp -R images app/src/main/assets/
           fi
 
           if [ -f "logo.png" ]; then
@@ -121,7 +115,6 @@ jobs:
               <application
                   android:label="Samson Calisthenics"
                   android:theme="@android:style/Theme.Material.Light.NoActionBar"
-                  android:usesCleartextTraffic="true"
                   android:allowBackup="false">
 
                   <activity
@@ -155,9 +148,11 @@ jobs:
                   super.onCreate(savedInstanceState);
 
                   webView = new WebView(this);
+
                   webView.getSettings().setJavaScriptEnabled(true);
                   webView.getSettings().setDomStorageEnabled(true);
                   webView.getSettings().setAllowFileAccess(true);
+
                   webView.setWebViewClient(new WebViewClient());
                   webView.setWebChromeClient(new WebChromeClient());
 
