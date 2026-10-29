@@ -1,447 +1,56 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#080611">
-<title>Samson Calisthenics</title>
-
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#080611"><title>Samson Calisthenics</title>
 <style>
-:root{--bg:#080611;--panel:#100d20;--purple:#852cff;--purple2:#b35cff;--text:#f5f1ff;--muted:#aaa3c5;--line:#39305a}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;padding-bottom:88px}
-button{font:inherit;cursor:pointer}
-.app{max-width:520px;margin:auto;padding:16px}
-.topbar{display:flex;align-items:center;justify-content:space-between;margin:8px 0 18px}
-.brand-small{font-size:12px;letter-spacing:3px;color:var(--purple2);font-weight:bold}
-h1{font-size:25px;margin:6px 0}
-h2{font-size:18px;margin:0}
-p{color:var(--muted)}
-.hero{position:relative;overflow:hidden;min-height:310px;border:1px solid var(--line);border-radius:25px;background:linear-gradient(150deg,#21113c,#090713 75%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:22px 16px;margin-bottom:20px}
-.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at top,#6425a455,transparent 65%);pointer-events:none}
-.hero-logo{width:94px;height:94px;object-fit:contain;position:relative}
-.hero h1{font-size:34px;line-height:1.02;letter-spacing:1px}
-.hero h1 span{display:block;color:var(--purple2);font-style:italic}
-.tagline{font-size:10px;letter-spacing:4px;font-weight:bold}
-.hero-foot{margin-top:30px;font-size:12px;color:#d0c5e9}
-.section-title{font-size:12px;letter-spacing:3px;color:var(--muted);margin:25px 2px 12px;font-weight:bold}
-.difficulties{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:18px 0}
-.difficulty{padding:13px 4px;border:1px solid var(--line);border-radius:13px;background:transparent;color:white;font-weight:bold}
-.difficulty.active{background:#6b29aa44;border-color:var(--purple2);box-shadow:0 0 16px #842cff33}
-.easy{color:#49e59a;border-color:#248a5b}
-.medium{color:#ffd45e;border-color:#9b7c26}
-.hard{color:#ff6287;border-color:#9a3153}
-.primary{width:100%;border:0;border-radius:17px;padding:19px 12px;color:white;font-weight:bold;font-size:16px;background:linear-gradient(110deg,#6725f7,#a21cff);box-shadow:0 8px 28px #791eff33}
-.exercise-list{display:grid;gap:10px}
-.exercise-card{display:flex;align-items:center;gap:13px;padding:10px;background:linear-gradient(110deg,#100d1d,#0a0813);border:1px solid var(--line);border-radius:19px;min-width:0}
-.exercise-card img{width:112px;height:100px;flex-shrink:0;object-fit:cover;border-radius:12px;background:#1b1630;border:1px solid #29223e}
-.exercise-info{flex:1;min-width:0}
-.exercise-info h3{font-size:13px;margin:0 0 8px}
-.exercise-info p{font-size:13px;margin:0 0 8px}
-.sets{display:inline-block;background:#7929f6;border-radius:9px;padding:6px 10px;font-size:10px;font-weight:bold}
-.arrow{font-size:25px;color:#c9a5ff;padding:0 4px}
-.page{display:none}
-.page.active{display:block}
-.back{background:none;border:0;color:white;font-size:25px;padding:0 12px 0 0}
-.page-heading{text-align:center;margin:18px 0 24px}
-.page-heading p{margin:8px 0}
-.detail-image{width:100%;height:260px;object-fit:cover;border-radius:20px;border:1px solid var(--line);background:#151025}
-.info-panel{padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:16px;margin:12px 0}
-.info-panel h3{font-size:13px;color:var(--purple2);margin:0 0 12px}
-.info-panel li{margin:9px 0;color:#ddd6ee;font-size:14px;line-height:1.45}
-.timer-label{text-align:center;color:var(--purple2);font-size:12px;letter-spacing:2px;font-weight:bold;margin-top:20px}
-.timer{font-size:48px;font-weight:bold;text-align:center;margin:15px 0;font-variant-numeric:tabular-nums}
-.timer-note{font-size:12px;line-height:1.5;text-align:center;color:var(--muted);min-height:18px}
-.timer-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.timer-controls button{padding:13px 4px;border-radius:12px;border:1px solid var(--line);background:#181128;color:white;font-size:12px;font-weight:bold}
-.timer-controls .start-btn{background:linear-gradient(110deg,#6725f7,#a21cff);border:0}
-.timer-controls button:disabled{opacity:.45;cursor:default}
-.nav{position:fixed;bottom:0;left:0;right:0;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);background:#090711f5;border-top:1px solid var(--line);padding:10px 0 max(10px,env(safe-area-inset-bottom))}
-.nav button{border:0;background:transparent;color:#8f87aa;font-size:11px;padding:5px 0}
-.nav button span{display:block;font-size:22px;margin-bottom:4px}
-.nav button.active{color:var(--purple2)}
-.history-item,.setting-item{padding:15px;margin:10px 0;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
-.empty{padding:25px 10px;text-align:center;color:var(--muted)}
-</style>
-</head>
-<body>
-<div class="app">
-
-<header class="topbar">
-  <div>
-    <div class="brand-small">DISCIPLINE BUILDS FREEDOM</div>
-    <h2>SAMSON <span style="color:#b35cff">CALISTHENICS</span></h2>
-  </div>
-  <div style="font-size:25px">♜</div>
-</header>
-
-<section id="home" class="page active">
-  <div class="hero">
-    <img class="hero-logo" src="images/logo.png" alt="Samson logo" onerror="this.style.display='none'">
-    <h1>SAMSON <span>CALISTHENICS</span></h1>
-    <div class="tagline">DISCIPLINE BUILDS FREEDOM</div>
-    <div class="hero-foot">BUILD STRENGTH · ONE REP AT A TIME</div>
-  </div>
-  <div class="difficulties">
-    <button class="difficulty easy active" onclick="setDifficulty('Easy',this)">EASY</button>
-    <button class="difficulty medium" onclick="setDifficulty('Medium',this)">MEDIUM</button>
-    <button class="difficulty hard" onclick="setDifficulty('Hard',this)">HARD</button>
-  </div>
-  <button class="primary" onclick="startWorkout()">▶ &nbsp; START WORKOUT</button>
-  <div class="section-title">YOUR TRAINING PLAN</div>
-  <div id="home-list" class="exercise-list"></div>
-</section>
-
-<section id="workout" class="page">
-  <div class="page-heading"><h2>WORKOUT</h2><p>Choose your exercises</p></div>
-  <div class="exercise-list" id="workout-list"></div>
-</section>
-
-<section id="detail" class="page">
-  <div style="display:flex;align-items:center;margin:10px 0 18px">
-    <button class="back" onclick="showPage('workout')">‹</button>
-    <h2 id="detail-title">EXERCISE</h2>
-  </div>
-  <img id="detail-image" class="detail-image" src="" alt="Exercise demonstration">
-  <h2 id="detail-name" style="margin-top:16px"></h2>
-  <p id="detail-reps"></p>
-  <div class="info-panel"><h3>HOW TO DO IT</h3><ol id="detail-steps"></ol></div>
-  <div class="info-panel"><h3>KEY TIPS</h3><ul id="detail-tips"></ul></div>
-
-  <div class="timer-label" id="timer-label">STOPWATCH</div>
-  <div class="timer" id="timer">00:00</div>
-  <p class="timer-note" id="timer-note">Gamitin ang timer habang nag-eehersisyo.</p>
-
-  <div class="timer-controls">
-    <button class="start-btn" id="timer-start" onclick="startTimer()">▶ START</button>
-    <button id="timer-pause" onclick="pauseTimer()" disabled>Ⅱ PAUSE</button>
-    <button id="timer-reset" onclick="resetTimer()">↻ RESET</button>
-  </div>
-
-  <button class="primary" style="margin-top:15px" onclick="completeExercise()">✓ &nbsp; MARK AS COMPLETED</button>
-</section>
-
-<section id="history" class="page">
-  <div class="page-heading"><h2>TRAINING HISTORY</h2><p>Your completed exercises</p></div>
-  <div id="history-list"></div>
-</section>
-
-<section id="settings" class="page">
-  <div class="page-heading"><h2>SETTINGS</h2><p>Samson Calisthenics</p></div>
-  <div class="setting-item">🏋️ Training level: <strong id="current-level">Easy</strong></div>
-  <div class="setting-item">📱 Version 1.1</div>
-  <div class="setting-item">🌙 Dark theme enabled</div>
-  <div class="setting-item">Images are loaded from the app's local assets.</div>
-  <button class="primary" onclick="showPage('home')">BACK TO HOME</button>
-</section>
-
-</div>
-
-<nav class="nav">
-  <button class="active" data-page="home" onclick="showPage('home')"><span>⌂</span>Home</button>
-  <button data-page="workout" onclick="showPage('workout')"><span>▥</span>Workout</button>
-  <button data-page="history" onclick="showPage('history')"><span>◷</span>History</button>
-  <button data-page="settings" onclick="showPage('settings')"><span>⚙</span>Settings</button>
-</nav>
-
+:root{--bg:#080611;--panel:#100d20;--purple:#852cff;--purple2:#b35cff;--text:#f5f1ff;--muted:#aaa3c5;--line:#39305a}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;padding-bottom:88px}button{font:inherit;cursor:pointer}.app{max-width:520px;margin:auto;padding:16px}.topbar{display:flex;align-items:center;justify-content:space-between;margin:8px 0 18px}.brand-small{font-size:12px;letter-spacing:3px;color:var(--purple2);font-weight:bold}h1{font-size:25px;margin:6px 0}h2{font-size:18px;margin:0}p{color:var(--muted)}.hero{position:relative;overflow:hidden;min-height:310px;border:1px solid var(--line);border-radius:25px;background:linear-gradient(150deg,#21113c,#090713 75%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:22px 16px;margin-bottom:20px}.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at top,#6425a455,transparent 65%);pointer-events:none}.hero-logo{width:94px;height:94px;object-fit:contain;position:relative}.hero h1{font-size:34px;line-height:1.02;letter-spacing:1px}.hero h1 span{display:block;color:var(--purple2);font-style:italic}.tagline{font-size:10px;letter-spacing:4px;font-weight:bold}.hero-foot{margin-top:30px;font-size:12px;color:#d0c5e9}.section-title{font-size:12px;letter-spacing:3px;color:var(--muted);margin:25px 2px 12px;font-weight:bold}.difficulties{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:18px 0}.difficulty{padding:13px 4px;border:1px solid var(--line);border-radius:13px;background:transparent;color:white;font-weight:bold}.difficulty.active{background:#6b29aa44;border-color:var(--purple2);box-shadow:0 0 16px #842cff33}.easy{color:#49e59a;border-color:#248a5b}.medium{color:#ffd45e;border-color:#9b7c26}.hard{color:#ff6287;border-color:#9a3153}.primary{width:100%;border:0;border-radius:17px;padding:19px 12px;color:white;font-weight:bold;font-size:16px;background:linear-gradient(110deg,#6725f7,#a21cff);box-shadow:0 8px 28px #791eff33}.exercise-list{display:grid;gap:10px}.exercise-card{display:flex;align-items:center;gap:13px;padding:10px;background:linear-gradient(110deg,#100d1d,#0a0813);border:1px solid var(--line);border-radius:19px;min-width:0;cursor:pointer}.exercise-card img{width:112px;height:100px;flex-shrink:0;object-fit:cover;border-radius:12px;background:#1b1630;border:1px solid #29223e}.exercise-info{flex:1;min-width:0}.exercise-info h3{font-size:13px;margin:0 0 8px}.exercise-info p{font-size:13px;margin:0 0 8px}.sets{display:inline-block;background:#7929f6;border-radius:9px;padding:6px 10px;font-size:10px;font-weight:bold}.arrow{font-size:25px;color:#c9a5ff;padding:0 4px}.page{display:none}.page.active{display:block}.back{background:none;border:0;color:white;font-size:25px;padding:0 12px 0 0}.page-heading{text-align:center;margin:18px 0 24px}.page-heading p{margin:8px 0}.detail-image{width:100%;height:260px;object-fit:cover;border-radius:20px;border:1px solid var(--line);background:#151025}.info-panel,.timer-box{padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:16px;margin:12px 0}.info-panel h3{font-size:13px;color:var(--purple2);margin:0 0 12px}.info-panel li{margin:9px 0;color:#ddd6ee;font-size:14px;line-height:1.45}.timer-label{text-align:center;color:var(--purple2);font-size:12px;letter-spacing:2px;font-weight:bold;margin-top:4px}.timer{font-size:48px;font-weight:bold;text-align:center;margin:15px 0;font-variant-numeric:tabular-nums}.timer-note{font-size:12px;line-height:1.5;text-align:center;color:var(--muted);min-height:18px}.timer-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.timer-controls button{padding:13px 4px;border-radius:12px;border:1px solid var(--line);background:#181128;color:white;font-size:12px;font-weight:bold}.timer-controls .start-btn{background:linear-gradient(110deg,#6725f7,#a21cff);border:0}.timer-controls button:disabled{opacity:.45;cursor:default}.small-note{font-size:11px;line-height:1.5;text-align:center;color:var(--muted)}.nav{position:fixed;bottom:0;left:0;right:0;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);background:#090711f5;border-top:1px solid var(--line);padding:10px 0 max(10px,env(safe-area-inset-bottom))}.nav button{border:0;background:transparent;color:#8f87aa;font-size:11px;padding:5px 0}.nav button span{display:block;font-size:22px;margin-bottom:4px}.nav button.active{color:var(--purple2)}.history-item,.setting-item{padding:15px;margin:10px 0;border:1px solid var(--line);border-radius:14px;background:var(--panel)}.empty{padding:25px 10px;text-align:center;color:var(--muted)}.sound-setting{display:flex;align-items:center;justify-content:space-between;gap:12px}.sound-setting input{width:22px;height:22px;accent-color:#852cff}
+</style></head><body><div class="app">
+<header class="topbar"><div><div class="brand-small">DISCIPLINE BUILDS FREEDOM</div><h2>SAMSON <span style="color:#b35cff">CALISTHENICS</span></h2></div><div style="font-size:25px">♜</div></header>
+<section id="home" class="page active"><div class="hero"><img class="hero-logo" src="images/logo.png" alt="Samson logo" onerror="this.style.display='none'"><h1>SAMSON <span>CALISTHENICS</span></h1><div class="tagline">DISCIPLINE BUILDS FREEDOM</div><div class="hero-foot">BUILD STRENGTH · ONE REP AT A TIME</div></div><div class="difficulties"><button class="difficulty easy active" onclick="setDifficulty('Easy',this)">EASY</button><button class="difficulty medium" onclick="setDifficulty('Medium',this)">MEDIUM</button><button class="difficulty hard" onclick="setDifficulty('Hard',this)">HARD</button></div><button class="primary" onclick="startWorkout()">▶ &nbsp; START WORKOUT</button><div class="section-title">YOUR TRAINING PLAN</div><div id="home-list" class="exercise-list"></div></section>
+<section id="workout" class="page"><div class="page-heading"><h2>WORKOUT</h2><p>Choose your exercises</p></div><div class="exercise-list" id="workout-list"></div></section>
+<section id="detail" class="page"><div style="display:flex;align-items:center;margin:10px 0 18px"><button class="back" onclick="showPage('workout')">‹</button><h2 id="detail-title">EXERCISE</h2></div><img id="detail-image" class="detail-image" src="" alt="Exercise demonstration"><h2 id="detail-name" style="margin-top:16px"></h2><p id="detail-reps"></p><div class="info-panel"><h3>HOW TO DO IT</h3><ol id="detail-steps"></ol></div><div class="info-panel"><h3>KEY TIPS</h3><ul id="detail-tips"></ul></div>
+<div id="plank-box" class="timer-box" style="display:none"><div class="timer-label">PLANK TIMER · 60 SECONDS</div><div class="timer" id="plank-timer">01:00</div><p class="timer-note" id="plank-note">Pindutin ang START kapag handa ka na.</p><div class="timer-controls"><button class="start-btn" id="plank-start" onclick="startPlank()">▶ START</button><button id="plank-pause" onclick="pausePlank()" disabled>Ⅱ PAUSE</button><button id="plank-reset" onclick="resetPlank()">↻ RESET</button></div></div>
+<div class="timer-box"><div class="timer-label">REST TIMER · PAHINGA SA PAGITAN NG SETS</div><div class="timer" id="rest-timer">02:00</div><p class="timer-note" id="rest-note">Pagkatapos ng set, pindutin ang START REST.</p><div class="timer-controls"><button class="start-btn" id="rest-start" onclick="startRest()">▶ START REST</button><button id="rest-pause" onclick="pauseRest()" disabled>Ⅱ PAUSE</button><button id="rest-reset" onclick="resetRest()">↻ RESET</button></div><p class="small-note">Pull-ups: 3 minutes. Iba pang exercises: 2 minutes. May ticking sound kapag naka-on ang sound setting.</p></div><button class="primary" style="margin-top:8px" onclick="completeExercise()">✓ &nbsp; MARK AS COMPLETED</button></section>
+<section id="history" class="page"><div class="page-heading"><h2>TRAINING HISTORY</h2><p>Your completed exercises</p></div><div id="history-list"></div></section>
+<section id="settings" class="page"><div class="page-heading"><h2>SETTINGS</h2><p>Samson Calisthenics</p></div><div class="setting-item">🏋️ Training level: <strong id="current-level">Easy</strong></div><div class="setting-item">📱 Version 1.3</div><div class="setting-item">🌙 Dark theme enabled</div><div class="setting-item sound-setting"><div><strong>🔊 Timer sounds</strong><p style="margin:5px 0 0">Ticking every second and finish alarm</p></div><input id="sound-toggle" type="checkbox" checked aria-label="Enable timer sounds" onchange="soundEnabled=this.checked"></div><div class="setting-item">Images load from the local images folder.</div><button class="primary" onclick="showPage('home')">BACK TO HOME</button></section></div>
+<nav class="nav"><button class="active" data-page="home" onclick="showPage('home')"><span>⌂</span>Home</button><button data-page="workout" onclick="showPage('workout')"><span>▥</span>Workout</button><button data-page="history" onclick="showPage('history')"><span>◷</span>History</button><button data-page="settings" onclick="showPage('settings')"><span>⚙</span>Settings</button></nav>
 <script>
-const exercises = [
- {
-  name:"Pull-ups",file:"pullup.png",reps:[8,12,15],unit:"reps",
-  steps:["Grip the bar slightly wider than shoulder-width.","Hang with your arms extended.","Pull yourself up until your chin reaches the bar.","Lower yourself slowly with control."],
-  tips:["Keep your core tight.","Avoid swinging.","Use a safe, stable pull-up bar."]
- },
- {
-  name:"Pike Push-ups",file:"pike.png",reps:[8,12,15],unit:"reps",
-  steps:["Start in an inverted V position with hips raised.","Place hands slightly wider than shoulder-width.","Bend elbows and lower your head toward the floor.","Push back to the starting position."],
-  tips:["Keep hips high.","Move slowly and with control.","Stop if you feel pain."]
- },
- {
-  name:"Decline Push-ups",file:"decline.png",reps:[10,15,20],unit:"reps",
-  steps:["Place your feet on a stable, low bench.","Position hands on the floor slightly wider than shoulders.","Lower your chest with control.","Push back up while keeping your body straight."],
-  tips:["Use a stable support.","Keep your core engaged.","Avoid arching your lower back."]
- },
- {
-  name:"Standard Push-ups",file:"pushups.png",reps:[10,20,30],unit:"reps",
-  steps:["Start in a high plank with hands under your shoulders.","Keep your head, hips and heels aligned.","Lower your chest toward the floor.","Push back up without letting your hips sag."],
-  tips:["Keep elbows at a comfortable angle.","Breathe steadily.","Use knee push-ups if needed."]
- },
- {
-  name:"Bench Dips",file:"dips.png",reps:[8,15,20],unit:"reps",
-  steps:["Place hands on a stable bench behind you.","Move your hips just in front of the bench.","Bend your elbows and lower only as far as comfortable.","Push through your hands to return up."],
-  tips:["Keep shoulders comfortable.","Do not lower too deeply.","Make sure the bench cannot slide."]
- },
- {
-  name:"Squat Jumps",file:"jumps.png",reps:[10,20,25],unit:"reps",
-  steps:["Stand with feet about shoulder-width apart.","Lower into a comfortable squat.","Jump upward with control.","Land softly and bend your knees."],
-  tips:["Land quietly.","Use a clear, non-slippery space.","Stop if you feel pain or dizziness."]
- },
- {
-  name:"Forearm Plank",file:"plank.png",reps:[30,45,60],unit:"seconds",
-  steps:["Place forearms on the floor with elbows under shoulders.","Extend your legs behind you.","Keep your body in a straight line.","Breathe normally while holding the position."],
-  tips:["Do not hold your breath.","Avoid dropping your hips.","Rest when your form breaks."]
- }
-];
-
-let difficulty="Easy";
-let selected=0;
-let elapsed=0;
-let remaining=0;
-let timerInterval=null;
-let timerRunning=false;
-let timerMode="stopwatch";
-let completed=[];
-
-try {
-  completed=JSON.parse(localStorage.getItem("samsonHistory")||"[]");
-  if(!Array.isArray(completed)) completed=[];
-} catch(e) {
-  completed=[];
-}
-
-function levelIndex(){
-  return difficulty==="Easy"?0:difficulty==="Medium"?1:2;
-}
-
-function repsText(ex){
-  return ex.unit==="seconds"
-    ? ex.reps[levelIndex()]+" seconds"
-    : ex.reps[levelIndex()]+" reps";
-}
-
-function imagePath(ex){
-  return "images/"+ex.file;
-}
-
-function card(ex,index){
-  return `<div class="exercise-card" onclick="openExercise(${index})">
-    <img src="${imagePath(ex)}" alt="${ex.name}" loading="lazy"
-      onerror="this.onerror=null;this.style.display='none'">
-    <div class="exercise-info">
-      <h3>${ex.name.toUpperCase()}</h3>
-      <p>${repsText(ex)}</p>
-      <span class="sets">♧ 3 SETS</span>
-    </div>
-    <span class="arrow">›</span>
-  </div>`;
-}
-
-function renderLists(){
-  document.getElementById("home-list").innerHTML=exercises.map((ex,i)=>card(ex,i)).join("");
-  document.getElementById("workout-list").innerHTML=exercises.map((ex,i)=>card(ex,i)).join("");
-}
-
-function setDifficulty(level,button){
-  difficulty=level;
-  document.querySelectorAll(".difficulty").forEach(b=>b.classList.remove("active"));
-  button.classList.add("active");
-  document.getElementById("current-level").textContent=level;
-  renderLists();
-
-  // Update the selected plank duration if its timer is not running.
-  if(exercises[selected].unit==="seconds" && !timerRunning){
-    resetTimer();
-  }
-}
-
-function showPage(page){
-  pauseTimer();
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.getElementById(page).classList.add("active");
-  document.querySelectorAll(".nav button").forEach(b=>{
-    b.classList.toggle("active",b.dataset.page===page);
-  });
-  if(page==="history") renderHistory();
-  window.scrollTo(0,0);
-}
-
-function startWorkout(){
-  showPage("workout");
-}
-
-function openExercise(index){
-  pauseTimer();
-  selected=index;
-  const ex=exercises[index];
-
-  document.getElementById("detail-title").textContent=ex.name.toUpperCase();
-  document.getElementById("detail-name").textContent=ex.name;
-  document.getElementById("detail-reps").textContent=repsText(ex)+" · 3 sets";
-
-  const img=document.getElementById("detail-image");
-  img.style.display="block";
-  img.src=imagePath(ex);
-  img.onerror=()=>{img.style.display="none";};
-
-  document.getElementById("detail-steps").innerHTML=ex.steps.map(s=>"<li>"+s+"</li>").join("");
-  document.getElementById("detail-tips").innerHTML=ex.tips.map(s=>"<li>"+s+"</li>").join("");
-
-  timerMode=ex.name==="Forearm Plank"?"countdown":"stopwatch";
-
-  document.getElementById("timer-label").textContent=
-    timerMode==="countdown"?"PLANK COUNTDOWN":"STOPWATCH";
-
-  document.getElementById("timer-note").textContent=
-    timerMode==="countdown"
-      ?"Piliin ang difficulty sa Home. Pindutin ang START para simulan."
-      :"Gamitin ang stopwatch habang ginagawa ang exercise.";
-
-  resetTimer();
-  showPage("detail");
-}
-
-function formatTime(seconds){
-  seconds=Math.max(0,Math.floor(seconds));
-  const minutes=String(Math.floor(seconds/60)).padStart(2,"0");
-  const secs=String(seconds%60).padStart(2,"0");
-  return minutes+":"+secs;
-}
-
-function updateTimerDisplay(){
-  document.getElementById("timer").textContent=
-    formatTime(timerMode==="countdown"?remaining:elapsed);
-}
-
-function updateTimerButtons(){
-  const start=document.getElementById("timer-start");
-  const pause=document.getElementById("timer-pause");
-
-  if(timerRunning){
-    start.textContent="▶ RUNNING";
-    start.disabled=true;
-    pause.disabled=false;
-  } else {
-    start.disabled=false;
-    pause.disabled=true;
-
-    if(timerMode==="countdown" && remaining===0){
-      start.textContent="✓ FINISHED";
-      start.disabled=true;
-    } else {
-      start.textContent=timerMode==="countdown"?"▶ START PLANK":"▶ START";
-    }
-  }
-}
-
-function startTimer(){
-  if(timerRunning) return;
-
-  if(timerMode==="countdown" && remaining<=0){
-    document.getElementById("timer-note").textContent=
-      "Pindutin ang RESET para magsimula ulit.";
-    return;
-  }
-
-  timerRunning=true;
-  updateTimerButtons();
-  document.getElementById("timer-note").textContent=
-    timerMode==="countdown"?"Plank countdown is running.":"Stopwatch is running.";
-
-  let lastTick=Date.now();
-
-  timerInterval=setInterval(()=>{
-    const now=Date.now();
-    const passed=Math.floor((now-lastTick)/1000);
-
-    if(passed<1) return;
-    lastTick+=passed*1000;
-
-    if(timerMode==="countdown"){
-      remaining=Math.max(0,remaining-passed);
-      updateTimerDisplay();
-
-      if(remaining===0){
-        clearInterval(timerInterval);
-        timerInterval=null;
-        timerRunning=false;
-        updateTimerButtons();
-        document.getElementById("timer-note").textContent=
-          "Tapos na ang timer. Magpahinga at huminga nang normal.";
-
-        try {
-          if(navigator.vibrate) navigator.vibrate([250,120,250]);
-        } catch(e) {}
-
-        alert("Tapos na ang plank timer! Magpahinga bago ang susunod na set.");
-      }
-    } else {
-      elapsed+=passed;
-      updateTimerDisplay();
-    }
-  },200);
-}
-
-function pauseTimer(){
-  if(timerInterval){
-    clearInterval(timerInterval);
-    timerInterval=null;
-  }
-
-  const wasRunning=timerRunning;
-  timerRunning=false;
-  updateTimerButtons();
-
-  if(wasRunning){
-    document.getElementById("timer-note").textContent=
-      "Naka-pause ang timer. Pindutin ang START para magpatuloy.";
-  }
-}
-
-function resetTimer(){
-  pauseTimer();
-  elapsed=0;
-
-  remaining=timerMode==="countdown"
-    ? exercises[selected].reps[levelIndex()]
-    : 0;
-
-  updateTimerDisplay();
-  updateTimerButtons();
-
-  document.getElementById("timer-note").textContent=
-    timerMode==="countdown"
-      ?"Handa na. "+remaining+" seconds ang plank timer."
-      :"Handa na ang stopwatch.";
-}
-
-function completeExercise(){
-  pauseTimer();
-  const ex=exercises[selected];
-
-  completed.unshift({
-    name:ex.name,
-    date:new Date().toLocaleString(),
-    level:difficulty
-  });
-
-  try {
-    localStorage.setItem("samsonHistory",JSON.stringify(completed));
-  } catch(e) {}
-
-  alert(ex.name+" marked as completed!");
-  showPage("history");
-}
-
-function renderHistory(){
-  const target=document.getElementById("history-list");
-
-  if(!completed.length){
-    target.innerHTML='<div class="empty">No completed exercises yet.<br>Finish an exercise to see it here.</div>';
-    return;
-  }
-
-  target.innerHTML=completed.map(x=>
-    `<div class="history-item">
-      <strong>✓ ${x.name}</strong>
-      <p>${x.level} · ${x.date}</p>
-    </div>`
-  ).join("");
-}
-
-renderLists();
-updateTimerDisplay();
-updateTimerButtons();
-</script>
-</body>
-</html>
+const exercises=[
+{name:'Pull-ups',files:['pullup.png','pullups.png'],reps:[8,12,15],unit:'reps',rest:180,steps:['Grip the bar slightly wider than shoulder-width.','Hang with your arms extended.','Pull yourself up until your chin reaches the bar.','Lower yourself slowly with control.'],tips:['Keep your core tight.','Avoid swinging.','Use a safe, stable pull-up bar.']},
+{name:'Pike Push-ups',files:['pike.png'],reps:[8,12,15],unit:'reps',rest:120,steps:['Start in an inverted V position with hips raised.','Place hands slightly wider than shoulder-width.','Bend elbows and lower your head toward the floor.','Push back to the starting position.'],tips:['Keep hips high.','Move slowly and with control.','Stop if you feel pain.']},
+{name:'Decline Push-ups',files:['decline.png'],reps:[10,15,20],unit:'reps',rest:120,steps:['Place your feet on a stable, low bench.','Position hands on the floor slightly wider than shoulders.','Lower your chest with control.','Push back up while keeping your body straight.'],tips:['Use a stable support.','Keep your core engaged.','Avoid arching your lower back.']},
+{name:'Standard Push-ups',files:['pushups.png','pushup.png'],reps:[10,20,30],unit:'reps',rest:120,steps:['Start in a high plank with hands under your shoulders.','Keep your head, hips and heels aligned.','Lower your chest toward the floor.','Push back up without letting your hips sag.'],tips:['Keep elbows at a comfortable angle.','Breathe steadily.','Use knee push-ups if needed.']},
+{name:'Bench Dips',files:['dips.png'],reps:[8,15,20],unit:'reps',rest:120,steps:['Place hands on a stable bench behind you.','Move your hips just in front of the bench.','Bend your elbows and lower only as far as comfortable.','Push through your hands to return up.'],tips:['Keep shoulders comfortable.','Do not lower too deeply.','Make sure the bench cannot slide.']},
+{name:'Squat Jumps',files:['jumps.png'],reps:[10,20,25],unit:'reps',rest:120,steps:['Stand with feet about shoulder-width apart.','Lower into a comfortable squat.','Jump upward with control.','Land softly and bend your knees.'],tips:['Land quietly.','Use a clear, non-slippery space.','Stop if you feel pain or dizziness.']},
+{name:'Forearm Plank',files:['plank.png'],reps:[60,60,60],unit:'seconds',rest:120,steps:['Place forearms on the floor with elbows under shoulders.','Extend your legs behind you.','Keep your body in a straight line.','Breathe normally while holding the position.'],tips:['Do not hold your breath.','Avoid dropping your hips.','Rest when your form breaks.']}];
+let difficulty='Easy',selected=0,completed=[],soundEnabled=true,audioContext=null;
+let plankRemaining=60,restRemaining=120,plankInterval=null,restInterval=null,plankRunning=false,restRunning=false;
+try{completed=JSON.parse(localStorage.getItem('samsonHistory')||'[]');if(!Array.isArray(completed))completed=[];}catch(e){completed=[];}
+function levelIndex(){return difficulty==='Easy'?0:difficulty==='Medium'?1:2;}function repsText(ex){return ex.unit==='seconds'?'60 seconds':ex.reps[levelIndex()]+' reps';}
+function card(ex,index){return `<div class="exercise-card" onclick="openExercise(${index})"><img src="images/${ex.files[0]}" alt="${ex.name}" loading="lazy" onerror="tryNextImage(this,${index},0)"><div class="exercise-info"><h3>${ex.name.toUpperCase()}</h3><p>${repsText(ex)}</p><span class="sets">♧ 3 SETS</span></div><span class="arrow">›</span></div>`;}
+function tryNextImage(img,index,failed){let files=exercises[index].files,next=failed+1;if(next<files.length){img.onerror=()=>tryNextImage(img,index,next);img.src='images/'+files[next];}else img.style.display='none';}
+function tryDetailImage(img,index,failed){let files=exercises[index].files,next=failed+1;if(next<files.length){img.onerror=()=>tryDetailImage(img,index,next);img.src='images/'+files[next];}else img.style.display='none';}
+function renderLists(){document.getElementById('home-list').innerHTML=exercises.map(card).join('');document.getElementById('workout-list').innerHTML=exercises.map(card).join('');}
+function setDifficulty(level,button){difficulty=level;document.querySelectorAll('.difficulty').forEach(b=>b.classList.remove('active'));button.classList.add('active');document.getElementById('current-level').textContent=level;renderLists();}
+function showPage(page){if(page!=='detail'){pausePlank(true);pauseRest(true);}document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(page).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));if(page==='history')renderHistory();window.scrollTo(0,0);}
+function startWorkout(){showPage('workout');}
+function openExercise(index){pausePlank(true);pauseRest(true);selected=index;let ex=exercises[index];document.getElementById('detail-title').textContent=ex.name.toUpperCase();document.getElementById('detail-name').textContent=ex.name;document.getElementById('detail-reps').textContent=repsText(ex)+' · 3 sets';let img=document.getElementById('detail-image');img.style.display='block';img.src='images/'+ex.files[0];img.onerror=()=>tryDetailImage(img,index,0);document.getElementById('detail-steps').innerHTML=ex.steps.map(s=>'<li>'+s+'</li>').join('');document.getElementById('detail-tips').innerHTML=ex.tips.map(s=>'<li>'+s+'</li>').join('');document.getElementById('plank-box').style.display=ex.name==='Forearm Plank'?'block':'none';plankRemaining=60;restRemaining=ex.rest;updatePlank();updateRest();updatePlankButtons();updateRestButtons();document.getElementById('plank-note').textContent='Pindutin ang START kapag handa ka na.';document.getElementById('rest-note').textContent='Pagkatapos ng set, pindutin ang START REST.';showPage('detail');}
+function fmt(n){return String(Math.floor(Math.max(0,n)/60)).padStart(2,'0')+':'+String(Math.floor(Math.max(0,n)%60)).padStart(2,'0');}
+function getAudio(){if(!soundEnabled)return null;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;if(!audioContext)audioContext=new AC();if(audioContext.state==='suspended')audioContext.resume();return audioContext;}catch(e){return null;}}
+function tone(freq=850,duration=75,volume=.045){const ctx=getAudio();if(!ctx)return;try{let osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.value=freq;gain.gain.setValueAtTime(volume,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+duration/1000);osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+duration/1000);}catch(e){}}
+function ticking(remaining,kind){if(!soundEnabled)return;if(remaining<=5&&remaining>0)tone(kind==='plank'?1000:680,110,.07);else tone(kind==='plank'?760:520,45,.025);}
+function finishSound(){if(!soundEnabled)return;tone(660,180,.1);setTimeout(()=>tone(880,180,.1),220);setTimeout(()=>tone(1100,350,.1),440);}
+function finishAlert(message){finishSound();try{if(navigator.vibrate)navigator.vibrate([250,120,250]);}catch(e){}setTimeout(()=>alert(message),80);}
+function updatePlank(){document.getElementById('plank-timer').textContent=fmt(plankRemaining);}function updateRest(){document.getElementById('rest-timer').textContent=fmt(restRemaining);}
+function updatePlankButtons(){let s=document.getElementById('plank-start'),p=document.getElementById('plank-pause');s.disabled=plankRunning||plankRemaining===0;s.textContent=plankRemaining===0?'✓ FINISHED':plankRunning?'▶ RUNNING':'▶ START';p.disabled=!plankRunning;}
+function updateRestButtons(){let s=document.getElementById('rest-start'),p=document.getElementById('rest-pause');s.disabled=restRunning||restRemaining===0;s.textContent=restRemaining===0?'✓ REST DONE':restRunning?'▶ RESTING':'▶ START REST';p.disabled=!restRunning;}
+function startPlank(){if(plankRunning||plankRemaining<=0)return;getAudio();plankRunning=true;updatePlankButtons();document.getElementById('plank-note').textContent='Timer running. Huminga nang normal.';plankInterval=setInterval(()=>{plankRemaining--;updatePlank();ticking(plankRemaining,'plank');if(plankRemaining<=0){pausePlank(true);updatePlankButtons();document.getElementById('plank-note').textContent='Tapos na ang 60 seconds. Magpahinga bago ang susunod na set.';finishAlert('Tapos na ang 60-second plank! Magpahinga bago ang susunod na set.');}},1000);}
+function pausePlank(silent=false){if(plankInterval){clearInterval(plankInterval);plankInterval=null;}let was=plankRunning;plankRunning=false;updatePlankButtons();if(was&&!silent)document.getElementById('plank-note').textContent='Naka-pause ang timer. Pindutin ang START para magpatuloy.';}
+function resetPlank(){pausePlank(true);plankRemaining=60;updatePlank();updatePlankButtons();document.getElementById('plank-note').textContent='Handa na. 60 seconds ang plank timer.';}
+function startRest(){if(restRunning||restRemaining<=0)return;getAudio();restRunning=true;updateRestButtons();document.getElementById('rest-note').textContent='Pahinga muna. Huminga nang normal at maghanda sa susunod na set.';restInterval=setInterval(()=>{restRemaining--;updateRest();ticking(restRemaining,'rest');if(restRemaining<=0){pauseRest(true);updateRestButtons();document.getElementById('rest-note').textContent='Tapos na ang pahinga. Kapag handa ka na, simulan ang susunod na set.';finishAlert('Tapos na ang rest timer! Handa ka na sa susunod na set.');}},1000);}
+function pauseRest(silent=false){if(restInterval){clearInterval(restInterval);restInterval=null;}let was=restRunning;restRunning=false;updateRestButtons();if(was&&!silent)document.getElementById('rest-note').textContent='Naka-pause ang pahinga. Pindutin ang START REST para magpatuloy.';}
+function resetRest(){pauseRest(true);restRemaining=exercises[selected].rest;updateRest();updateRestButtons();document.getElementById('rest-note').textContent='Handa na ang rest timer: '+fmt(restRemaining)+'.';}
+function completeExercise(){pausePlank(true);pauseRest(true);let ex=exercises[selected];completed.unshift({name:ex.name,date:new Date().toLocaleString(),level:difficulty});try{localStorage.setItem('samsonHistory',JSON.stringify(completed));}catch(e){}alert(ex.name+' marked as completed!');showPage('history');}
+function renderHistory(){let target=document.getElementById('history-list');if(!completed.length){target.innerHTML='<div class="empty">No completed exercises yet.<br>Finish an exercise to see it here.</div>';return;}target.innerHTML=completed.map(x=>`<div class="history-item"><strong>✓ ${x.name}</strong><p>${x.level} · ${x.date}</p></div>`).join('');}
+renderLists();updatePlank();updateRest();updatePlankButtons();updateRestButtons();
+</script></body></html>
